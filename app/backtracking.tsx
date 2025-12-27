@@ -17,6 +17,10 @@ function backtracking(grid) {
 
 }
 
+interface IGrid {
+    
+}
+
 class SudokuGrid {
     grid = Array(9).fill(Array(9).fill(null));
 }
