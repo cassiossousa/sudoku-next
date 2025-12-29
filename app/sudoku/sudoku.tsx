@@ -7,7 +7,7 @@ export interface IGridCell {
   getPosition(): number[];
 }
 
-class SudokuGridCell implements IGridCell {
+export class SudokuGridCell implements IGridCell {
   row: number;
   col: number;
   initialValue: number | null;
