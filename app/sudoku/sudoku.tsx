@@ -4,13 +4,18 @@ export interface IGridCell {
   getInitialValue(): number | null;
   getValue(): number | null;
   setValue(value: number): void;
+  getPosition(): number[];
 }
 
 class SudokuGridCell implements IGridCell {
+  row: number;
+  col: number;
   initialValue: number | null;
   value: number | null;
 
-  constructor(initialValue: number | null, value?: number | null) {
+  constructor(row: number, col: number, initialValue: number | null, value?: number | null) {
+    this.row = row;
+    this.col = col;
     this.initialValue = initialValue;
     this.value = initialValue ? null : (value || null);
   }
@@ -25,6 +30,10 @@ class SudokuGridCell implements IGridCell {
 
   setValue(value: number): void {
     this.value = value;
+  }
+
+  getPosition(): number[] {
+    return [this.row, this.col];
   }
 }
 
@@ -49,7 +58,7 @@ export class SudokuGrid implements IGrid {
       for (let col = 0; col < 9; col++) {
         const initialValue: number | null = initialValues?.[row]?.[col] || null;
         const value: number | null = values?.[row]?.[col] || null;
-        this.grid[row].push(new SudokuGridCell(initialValue, value));
+        this.grid[row].push(new SudokuGridCell(row, col, initialValue, value));
       }
     }
   }
@@ -66,20 +75,17 @@ export class SudokuGrid implements IGrid {
     return null;
   }
 
-  findCellPosition(cell: IGridCell): [number, number] | null {
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        if (this.grid[row][col] === cell) {
-          return [row, col];
-        }
-      }
-    }
+  findCellPosition(cell: IGridCell): number[] | null {
+    const cellPosition: number[] = cell.getPosition();
+    const [row, col] = cellPosition;
+    if (this.grid[row][col] === cell) return cellPosition;
     return null;
   }
 
   getNextEmptyCell(cell: IGridCell): IGridCell | null {
-    const cellPosition: [number, number] | null = this.findCellPosition(cell);
+    const cellPosition: number[] | null = this.findCellPosition(cell);
     if (cellPosition === null) return null;
+
     const [rowCurrent, colCurrent] = cellPosition;
     // We can safely avoid every row before the current cell's row.
     for (let row = rowCurrent; row < 9; row++) {
@@ -113,13 +119,8 @@ export class SudokuGrid implements IGrid {
     return new SudokuGrid(this.initialValues, currentValues);
   }
 
-  getAvailableGuessesInRow(cell: IGridCell): Set<number> {
-    // If cell already has a value, there are no available guesses for it.
-    if (cell.getValue() !== null) return new Set();
-    const cellPosition: [number, number] | null = this.findCellPosition(cell);
-    if (cellPosition === null) return new Set();
+  getAvailableGuessesInRow(row: number): Set<number> {
     const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const [row, _] = cellPosition;
     for (let col = 0; col < 9; col++) {
       const currentValue = this.grid[row][col].getValue();
       if (currentValue !== null) availableGuesses.delete(currentValue);
@@ -127,13 +128,8 @@ export class SudokuGrid implements IGrid {
     return availableGuesses;
   }
 
-  getAvailableGuessesInCol(cell: IGridCell): Set<number> {
-    // If cell already has a value, there are no available guesses for it.
-    if (cell.getValue() !== null) return new Set();
-    const cellPosition: [number, number] | null = this.findCellPosition(cell);
-    if (cellPosition === null) return new Set();
+  getAvailableGuessesInCol(col: number): Set<number> {
     const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const [_, col] = cellPosition;
     for (let row = 0; row < 9; row++) {
       const currentValue = this.grid[row][col].getValue();
       if (currentValue) availableGuesses.delete(currentValue);
@@ -141,13 +137,8 @@ export class SudokuGrid implements IGrid {
     return availableGuesses;
   }
     
-  getAvailableGuessesInBox(cell: IGridCell): Set<number> {
-    // If cell already has a value, there are no available guesses for it.
-    if (cell.getValue() !== null) return new Set();
-    const cellPosition: [number, number] | null = this.findCellPosition(cell);
-    if (cellPosition === null) return new Set();
+  getAvailableGuessesInBox(row: number, col: number): Set<number> {
     const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const [row, col] = cellPosition;
     const startRow = 3 * Math.floor(row / 3);
     const startCol = 3 * Math.floor(col / 3);
     for (let r = startRow; r < startRow + 3; r++) {
@@ -160,9 +151,18 @@ export class SudokuGrid implements IGrid {
   }
 
   getAvailableGuesses(cell: IGridCell): Set<number> {
-    const availableValuesInBox = this.getAvailableGuessesInBox(cell);
-    const availableValuesInRow = this.getAvailableGuessesInRow(cell);
-    const availableValuesInCol = this.getAvailableGuessesInCol(cell);
+    // Cells with values have no available guesses.
+    if (cell.getValue() !== null) return new Set();
+
+    // Double-check that the cell belongs to the grid.
+    const cellPosition: number[] | null = this.findCellPosition(cell);
+    if (cellPosition === null) return new Set();
+    const [row, col] = cellPosition;
+
+    const availableValuesInRow = this.getAvailableGuessesInRow(row);
+    const availableValuesInCol = this.getAvailableGuessesInCol(col);
+    const availableValuesInBox = this.getAvailableGuessesInBox(row, col);
+
     return new Set(
       [...availableValuesInBox].filter(
         (val: number) => {
