@@ -37,7 +37,7 @@ interface IGrid {
     print(): string;
 }
 
-class SudokuGrid implements IGrid {
+export class SudokuGrid implements IGrid {
     grid: IGridCell[][];
     initialValues: (number | null)[][] | undefined;
 
@@ -45,20 +45,20 @@ class SudokuGrid implements IGrid {
         this.grid = [];
         this.initialValues = initialValues;
 
-        for (let yPos = 0; yPos < 9; yPos++) {
+        for (let row = 0; row < 9; row++) {
             this.grid.push([]);
-            for (let xPos = 0; xPos < 9; xPos++) {
-                const initialValue: number | null = initialValues?.[xPos]?.[yPos] || null;
-                const value: number | null = values?.[xPos]?.[yPos] || null;
-                this.grid[xPos].push(new SudokuGridCell(initialValue, value));
+            for (let col = 0; col < 9; col++) {
+                const initialValue: number | null = initialValues?.[row]?.[col] || null;
+                const value: number | null = values?.[row]?.[col] || null;
+                this.grid[row].push(new SudokuGridCell(initialValue, value));
             }
         }
     }
 
     getFirstEmptyCell(): IGridCell | null {
-        for (let yPos = 0; yPos < 9; yPos++) {
-            for (let xPos = 0; xPos < 9; xPos++) {
-                const cell = this.grid[xPos][yPos];
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                const cell = this.grid[row][col];
                 if (cell.getInitialValue() === null) {
                     return cell;
                 }
@@ -69,10 +69,10 @@ class SudokuGrid implements IGrid {
     }
 
     findCellPosition(cell: IGridCell): [number, number] | null {
-        for (let yPos = 0; yPos < 9; yPos++) {
-            for (let xPos = 0; xPos < 9; xPos++) {
-                if (this.grid[xPos][yPos] === cell) {
-                    return [xPos, yPos];
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (this.grid[row][col] === cell) {
+                    return [row, col];
                 }
             }
         }
@@ -84,16 +84,16 @@ class SudokuGrid implements IGrid {
         const cellPosition: [number, number] | null = this.findCellPosition(cell);
         if (cellPosition === null) return null;
 
-        const [xPosCurrent, yPosCurrent] = cellPosition;
+        const [colCurrent, rowCurrent] = cellPosition;
 
         // We can safely avoid every row before the current cell's row.
-        for (let yPos = yPosCurrent; yPos < 9; yPos++) {
+        for (let row = rowCurrent; row < 9; row++) {
             // We cannot avoid columns as easily,
             // as the current cell's next row (if any)
             // must be iterated through every column.
-            for (let xPos = 0; xPos < 9; xPos++) {
-                if (yPos === yPosCurrent && xPos <= xPosCurrent) continue;
-                const nextCell = this.grid[xPos][yPos];
+            for (let col = 0; col < 9; col++) {
+                if (row === rowCurrent && col <= colCurrent) continue;
+                const nextCell = this.grid[row][col];
                 if (nextCell.getInitialValue() === null) {
                     return nextCell;
                 }
@@ -110,11 +110,11 @@ class SudokuGrid implements IGrid {
     getCopy(): IGrid {
         const currentValues: (number | null)[][] = [];
 
-        for (let xPos = 0; xPos < 9; xPos++) {
+        for (let row = 0; row < 9; row++) {
             currentValues.push([]);
-            for (let yPos = 0; yPos < 9; yPos++) {
-                const currentValue = this.grid[xPos][yPos].getValue();
-                currentValues[xPos].push(currentValue);
+            for (let col = 0; col < 9; col++) {
+                const currentValue = this.grid[row][col].getValue();
+                currentValues[row].push(currentValue);
             }
         }
 
@@ -129,10 +129,10 @@ class SudokuGrid implements IGrid {
         if (cellPosition === null) return new Set();
 
         const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        const [_, yPos] = cellPosition;
+        const [row, _] = cellPosition;
 
-        for (let xPos = 0; xPos < 9; xPos++) {
-            const currentValue = this.grid[xPos][yPos].getValue();
+        for (let col = 0; col < 9; col++) {
+            const currentValue = this.grid[row][col].getValue();
             if (currentValue !== null) availableGuesses.delete(currentValue);
         }
 
@@ -147,10 +147,10 @@ class SudokuGrid implements IGrid {
         if (cellPosition === null) return new Set();
 
         const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        const [xPos, _] = cellPosition;
+        const [_, col] = cellPosition;
 
-        for (let yPos = 0; yPos < 9; yPos++) {
-            const currentValue = this.grid[xPos][yPos].getValue();
+        for (let row = 0; row < 9; row++) {
+            const currentValue = this.grid[row][col].getValue();
             if (currentValue) availableGuesses.delete(currentValue);
         }
 
@@ -165,10 +165,10 @@ class SudokuGrid implements IGrid {
         if (cellPosition === null) return new Set();
 
         const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        const [xPos, yPos] = cellPosition;
+        const [col, row] = cellPosition;
 
-        const startRow = 3 * Math.floor(yPos / 3);
-        const startCol = 3 * Math.floor(xPos / 3);
+        const startRow = 3 * Math.floor(row / 3);
+        const startCol = 3 * Math.floor(col / 3);
 
         for (let r = startRow; r < startRow + 3; r++) {
             for (let c = startCol; c < startCol + 3; c++) {
@@ -197,16 +197,20 @@ class SudokuGrid implements IGrid {
     }
 
     print(): string {
-        const sudokuParts: string[] = []
-        for (let yPos = 0; yPos < 9; yPos++) {
-            const sudokuPartsY: string[] = [];
-            for (let xPos = 0; xPos < 9; xPos++) {
-                const value: number | null = this.grid[xPos][yPos].getValue();
-                sudokuPartsY.push(`${value || " "}`);
+        const sudokuParts: string[] = [];
+        for (let row = 0; row < 9; row++) {
+            if (row % 3 === 0) sudokuParts.push(`-------------`);
+            const sudokuPartsRow: string[] = [];
+            for (let col = 0; col < 9; col++) {
+                if (col % 3 === 0) sudokuPartsRow.push(`|`);
+                const value: number | null = this.grid[row][col].getValue();
+                sudokuPartsRow.push(`${value || " "}`);
             }
-            sudokuParts.push(sudokuPartsY.join(''))
+            sudokuPartsRow.push('|');
+            sudokuParts.push(sudokuPartsRow.join(''))
         }
 
+        sudokuParts.push(`-------------`)
         return sudokuParts.join(`\n`);
     }
 }
