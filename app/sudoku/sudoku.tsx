@@ -151,14 +151,14 @@ export class SudokuGrid implements IGrid {
   }
 
   getAvailableGuesses(cell: IGridCell): Set<number> {
-    // Cells with values have no available guesses.
-    if (cell.getValue() !== null) return new Set();
-
     // Double-check that the cell belongs to the grid.
     const cellPosition: number[] | null = this.findCellPosition(cell);
     if (cellPosition === null) return new Set();
-    const [row, col] = cellPosition;
 
+    // Cells with values have no available guesses.
+    if (cell.getValue() !== null) return new Set();
+
+    const [row, col] = cellPosition;
     const availableValuesInRow = this.getAvailableGuessesInRow(row);
     const availableValuesInCol = this.getAvailableGuessesInCol(col);
     const availableValuesInBox = this.getAvailableGuessesInBox(row, col);
