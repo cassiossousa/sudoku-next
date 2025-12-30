@@ -1,10 +1,10 @@
 export interface IGridCell {
   initialValue: number | null;
   value: number | null;
-  getInitialValue(): number | null;
   getValue(): number | null;
   setValue(value: number): void;
   getPosition(): number[];
+  print(): string;
 }
 
 export class SudokuGridCell implements IGridCell {
@@ -20,20 +20,20 @@ export class SudokuGridCell implements IGridCell {
     this.value = initialValue ? null : (value || null);
   }
 
-  getInitialValue(): number | null {
-    return this.initialValue;
-  }
-
   getValue(): number | null {
     return this.initialValue || this.value;
   }
 
   setValue(value: number): void {
-    this.value = value;
+    if (!this.initialValue) this.value = value;
   }
 
   getPosition(): number[] {
     return [this.row, this.col];
+  }
+
+  print(): string {
+    return `[${this.row + 1}, ${this.col + 1}] - (${this.getValue() || ' '})`;
   }
 }
 
@@ -67,7 +67,7 @@ export class SudokuGrid implements IGrid {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
         const cell = this.grid[row][col];
-        if (cell.getInitialValue() === null) {
+        if (cell.getValue() === null) {
           return cell;
         }
       }
@@ -95,7 +95,7 @@ export class SudokuGrid implements IGrid {
       for (let col = 0; col < 9; col++) {
         if (row === rowCurrent && col <= colCurrent) continue;
         const nextCell = this.grid[row][col];
-        if (nextCell.getInitialValue() === null) {
+        if (nextCell.getValue() === null) {
           return nextCell;
         }
       }
@@ -107,7 +107,7 @@ export class SudokuGrid implements IGrid {
     return new SudokuGrid(this.initialValues);
   }
 
-  getCopy(): IGrid {
+  getCurrentValues(): (number | null)[][] {
     const currentValues: (number | null)[][] = [];
     for (let row = 0; row < 9; row++) {
         currentValues.push([]);
@@ -116,7 +116,11 @@ export class SudokuGrid implements IGrid {
             currentValues[row].push(currentValue);
         }
     }
-    return new SudokuGrid(this.initialValues, currentValues);
+    return currentValues;
+  }
+
+  getCopy(): IGrid {
+    return new SudokuGrid(this.initialValues, this.getCurrentValues());
   }
 
   getAvailableGuessesInRow(row: number): Set<number> {

@@ -33,10 +33,10 @@ export function backtracking(grid: IGrid): IGrid[] {
 
     const _isSudokuValid = (currentGrid: IGrid, currentCell: IGridCell): boolean => {
         // Try every available guess in the current cell.
-        const availableValues: Set<number> = currentGrid.getAvailableGuesses(currentCell);
+        const availableGuesses: Set<number> = currentGrid.getAvailableGuesses(currentCell);
 
         // EXIT CONDITION [INVALID] - cell cannot be filled at all.
-        if (availableValues.size === 0) {
+        if (availableGuesses.size === 0) {
             return false;
         }
 
@@ -44,12 +44,12 @@ export function backtracking(grid: IGrid): IGrid[] {
 
         // SMALL OPTIMIZATION - If there is only one possible guess,
         // we can just add it to the grid without having to copy it.
-        if (availableValues.size === 1) {
-            const value: number = availableValues.values().next().value!;
+        if (availableGuesses.size === 1) {
+            const value: number = availableGuesses.values().next().value!;
             currentCell.setValue(value);
             nextCell = nextGrid.getNextEmptyCell(currentCell);
         } else {
-            availableValues.forEach((value: number): void => {
+            availableGuesses.forEach((value: number): void => {
                 // If there are multiple (possible) guesses,
                 // each one should be added to a copy of the current grid,
                 // in order to avoid different backtracking recursions
