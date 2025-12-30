@@ -15,8 +15,9 @@ describe('fillSingleGuesses()', () => {
       [2, 8, 7, 5, 4, 9, 6, 1, 3],
     ]);
 
-    const fullySolved = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillSingleGuesses(sudoku);
     expect(fullySolved).toBe(true);
+    expect(steps.length).toBe(0);
     expect(sudoku.print()).toBe(
       "-------------\n" +
       "|692|415|378|\n" +
@@ -47,8 +48,9 @@ describe('fillSingleGuesses()', () => {
       [0, 8, 7, 0, 0, 0, 6, 0, 3],
     ]);
 
-    const fullySolved = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillSingleGuesses(sudoku);
     expect(fullySolved).toBe(true);
+    expect(steps.length).toBe(43);
     expect(sudoku.print()).toBe(
       "-------------\n" +
       "|692|415|378|\n" +
@@ -79,8 +81,9 @@ describe('fillSingleGuesses()', () => {
       [0, 6, 0, 0, 0, 5, 3, 0, 0],
     ]);
 
-    const fullySolved = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillSingleGuesses(sudoku);
     expect(fullySolved).toBe(false);
+    expect(steps.length).toBe(9);
     expect(sudoku.print()).toBe(
       "-------------\n"+
       "|64 |8  |2  |\n"+

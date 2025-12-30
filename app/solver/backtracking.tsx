@@ -37,7 +37,7 @@ export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
   const _recursiveBacktracking = (currentGrid: IGrid): void => {
     // OPTIMIZATION: fill all single guesses in-place,
     // and if this is enough to solve the grid, return it.
-    const fullySolved = fillSingleGuesses(currentGrid);
+    const [fullySolved, _] = fillSingleGuesses(currentGrid);
     if (fullySolved) {
       solutions.push(currentGrid);
       return;
