@@ -4,7 +4,6 @@ export interface IGridCell {
   getValue(): number | null;
   setValue(value: number): void;
   getPosition(): number[];
-  print(): string;
 }
 
 export class SudokuGridCell implements IGridCell {
@@ -30,10 +29,6 @@ export class SudokuGridCell implements IGridCell {
 
   getPosition(): number[] {
     return [this.row, this.col];
-  }
-
-  print(): string {
-    return `[${this.row + 1}, ${this.col + 1}] - (${this.getValue() || ' '})`;
   }
 }
 
