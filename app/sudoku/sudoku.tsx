@@ -43,9 +43,9 @@ export interface IGrid {
 
 export class SudokuGrid implements IGrid {
   grid: IGridCell[][];
-  initialValues: (number | null)[][] | undefined;
+  initialValues: (number | null)[][];
 
-  constructor(initialValues?: (number | null)[][], values?: (number | null)[][]) {
+  constructor(initialValues: (number | null)[][], values?: (number | null)[][]) {
     this.grid = [];
     this.initialValues = initialValues;
     for (let row = 0; row < 9; row++) {
