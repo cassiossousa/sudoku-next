@@ -1,5 +1,6 @@
 import { IGrid, IGridCell } from "../sudoku/sudoku";
 import { fillSingleGuesses } from "./single-guess";
+import { SolverStep } from "./step";
 
 /**
  * Let's imagine how a basic backtracking algorithm would work:
@@ -29,19 +30,24 @@ import { fillSingleGuesses } from "./single-guess";
  * of unknown cells. Any grid with less-than-17 values (guaranteed to have multiple
  * solutions) could easily take hours or over millions of years to be fully solved.
  */
-export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
+export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], boolean] {
   const emptyGrid = grid.getEmptyCopy();
-  const solutions: IGrid[] = [];
+  const solutions: [IGrid, SolverStep[]][] = [];
   let backtrackingNeeded = false;
 
-  const _recursiveBacktracking = (currentGrid: IGrid): void => {
+  const _recursiveBacktracking = (currentGrid: IGrid, currentSteps: SolverStep[]): void => {
     // OPTIMIZATION: fill all single guesses in-place,
     // and if this is enough to solve the grid, return it.
-    const [fullySolved, _] = fillSingleGuesses(currentGrid);
+    const [fullySolved, singleGuessSteps] = fillSingleGuesses(currentGrid);
+
     if (fullySolved) {
-      solutions.push(currentGrid);
+      solutions.push([currentGrid, [...currentSteps, ...singleGuessSteps]]);
       return;
     }
+
+    // Code needs to get to this very point
+    // in order to require backtracking.
+    backtrackingNeeded = true;
 
     // After the first optimization, this next cell cannot be null.
     const firstCell = currentGrid.getFirstEmptyCell()!;
@@ -51,10 +57,6 @@ export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
     if (availableGuesses.size === 0) {
       return;
     }
-
-    // Code needs to get to this very point
-    // in order to require backtracking.
-    backtrackingNeeded = true;
 
     availableGuesses.forEach((value: number): void => {
       // If there are multiple (possible) guesses,
@@ -68,11 +70,22 @@ export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
       // (and is not null).
       const copyFirstCell: IGridCell = copyCurrentGrid.getFirstEmptyCell()!;
       copyFirstCell.setValue(value);
-      _recursiveBacktracking(copyCurrentGrid);
+
+      const backtrackingStep: SolverStep = {
+        solverType: 'backtracking',
+        position: copyFirstCell.getPosition(),
+        value
+      };
+
+      _recursiveBacktracking(copyCurrentGrid, [
+        ...currentSteps,
+        ...singleGuessSteps,
+        backtrackingStep,
+      ]);
     });
   }
 
   // RECURSION CALL
-  _recursiveBacktracking(emptyGrid);
+  _recursiveBacktracking(emptyGrid, []);
   return [solutions, backtrackingNeeded];
 }

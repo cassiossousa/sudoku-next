@@ -18,7 +18,10 @@ describe('solveByBacktracking()', () => {
     const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
-    expect(solutions[0]).toEqual(sudoku);
+
+    const [solvedGame, steps] = solutions[0];
+    expect(steps.length).toBe(0);
+    expect(solvedGame).toEqual(sudoku);
   });
 
   it('short-circuits easy Sudoku games that can be solved via single-guess cells only', () => {
@@ -37,7 +40,11 @@ describe('solveByBacktracking()', () => {
     const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
-    expect(solutions[0].print()).toBe(
+
+    const [solvedGame, steps] = solutions[0];
+    expect(steps.length).toBe(43);
+    expect(steps.filter(step => step.solverType === 'single-guess').length).toBe(43);
+    expect(solvedGame.print()).toBe(
       "-------------\n" +
       "|692|415|378|\n" +
       "|815|763|429|\n" +
@@ -70,7 +77,12 @@ describe('solveByBacktracking()', () => {
     const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(1);
-    expect(solutions[0].print()).toBe(
+
+    const [solvedGame, steps] = solutions[0];
+    expect(steps.length).toBe(53);
+    expect(steps.filter(step => step.solverType === 'single-guess').length).toBe(46);
+    expect(steps.filter(step => step.solverType === 'backtracking').length).toBe(7);
+    expect(solvedGame.print()).toBe(
       "-------------\n" +
       "|649|831|257|\n" +
       "|531|672|984|\n" +
@@ -88,7 +100,7 @@ describe('solveByBacktracking()', () => {
   });
 
   it('returns multiple solutions by backtracking quasi-Sudoku games', () => {
-const sudoku: SudokuGrid = new SudokuGrid([
+    const sudoku: SudokuGrid = new SudokuGrid([
       [2, 9, 5, 7, 4, 3, 8, 6, 1],
       [4, 3, 1, 8, 6, 5, 9, 0, 0],
       [8, 7, 6, 1, 9, 2, 5, 4, 3],
@@ -103,7 +115,12 @@ const sudoku: SudokuGrid = new SudokuGrid([
     const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(2);
-    expect(solutions[0].print()).toBe(
+
+    const [firstGame, firstGameSteps] = solutions[0];
+    expect(firstGameSteps.length).toBe(4);
+    expect(firstGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
+    expect(firstGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
+    expect(firstGame.print()).toBe(
       "-------------\n" +
       "|295|743|861|\n" +
       "|431|865|927|\n" +
@@ -119,7 +136,11 @@ const sudoku: SudokuGrid = new SudokuGrid([
       "-------------"
     );
 
-    expect(solutions[1].print()).toBe(
+    const [secondGame, secondGameSteps] = solutions[1];
+    expect(secondGameSteps.length).toBe(4);
+    expect(secondGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
+    expect(secondGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
+    expect(secondGame.print()).toBe(
       "-------------\n" +
       "|295|743|861|\n" +
       "|431|865|972|\n" +
