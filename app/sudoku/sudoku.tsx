@@ -2,6 +2,7 @@ export interface IGridCell {
   initialValue: number | null;
   value: number | null;
   getValue(): number | null;
+  hasInitialValue(): boolean;
   setValue(value: number): void;
   getPosition(): number[];
 }
@@ -17,6 +18,10 @@ export class SudokuGridCell implements IGridCell {
     this.col = col;
     this.initialValue = initialValue;
     this.value = initialValue ? null : (value || null);
+  }
+
+  hasInitialValue(): boolean {
+    return Boolean(this.initialValue);    
   }
 
   getValue(): number | null {

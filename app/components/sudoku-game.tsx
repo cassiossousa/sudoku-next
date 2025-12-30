@@ -1,5 +1,6 @@
 import { IGridCell, SudokuGrid } from "../sudoku/sudoku";
 import SudokuGameCell from "./sudoku-game-cell";
+import SudokuGameCellInitial from "./sudoku-game-cell-initial";
 
 export default function SudokuGame() {
   const sudoku = new SudokuGrid([
@@ -37,13 +38,24 @@ export default function SudokuGame() {
                   {[0, 1, 2].map((boxCol: number) => {
                     const row = boardRow * 3 + boxRow;
                     const col = boardCol * 3 + boxCol;
-                    return (
+                    const cell = sudoku.grid[row][col];
+                    const value = cell.getValue();
+                    const hasInitialValue = cell.hasInitialValue();
+                    return hasInitialValue ? (
+                      <SudokuGameCellInitial
+                        key={`cell-${row}-${col}`}
+                        initialValue={value!}
+                      >
+                      </SudokuGameCellInitial>
+                    ) : (
                       <SudokuGameCell
                         key={`cell-${row}-${col}`}
-                        cell={sudoku.grid[row][col]}
+                        value={value}
+                        row={row}
+                        col={col}
                       >
                       </SudokuGameCell>
-                    );
+                    )
                   })}
                   </div>
                 ))}

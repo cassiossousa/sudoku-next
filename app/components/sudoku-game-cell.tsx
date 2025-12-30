@@ -1,18 +1,12 @@
-import { IGridCell } from "../sudoku/sudoku"
+'use client'
 
-export default function SudokuGameCell({ cell } : { cell: IGridCell }) {
-  const hasInitialValue = Boolean(cell.initialValue);
-  return hasInitialValue ? (
-    <div
-      className={`flex justify-center align-center border-black border w-7 h-7 font-bold text-blue-700`}
-    >
-      { cell.getValue() }
-    </div>
-  ) : (
+export default function SudokuGameCell({ value, row, col }: { value: number | null, row: number, col: number }) {
+  return (
     <button
-      className={`flex justify-center align-center border-black border w-7 h-7 font-bold text-black`}
+      className='flex justify-center align-center border-black border w-7 h-7 font-bold text-black cursor-pointer'
+      onClick={() => alert('CLICKED ME')}
     >
-      { cell.getValue() }
+      { value }
     </button>
   )
 }
