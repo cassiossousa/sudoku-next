@@ -1,4 +1,5 @@
 import { IGrid, IGridCell } from "../sudoku/sudoku";
+import { fillSingleGuesses } from "./single-guess";
 
 /**
  * Let's imagine how a basic backtracking algorithm would work:
@@ -17,65 +18,50 @@ import { IGrid, IGridCell } from "../sudoku/sudoku";
  * 6. Repeat this process until you exhaust all possible ways to fill the board;
  * 7. Return every valid grid you found (if any).
  */
-export function backtracking(grid: IGrid): IGrid[] {
-    const emptyGrid = grid.getEmptyCopy();
-    const firstCell = emptyGrid.getFirstEmptyCell();
+export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
+  const emptyGrid = grid.getEmptyCopy();
+  const solutions: IGrid[] = [];
+  let backtrackingNeeded = false;
 
-    // This is something funny to assume, actually.
-    // If the empty grid has no empty cells, what is happening?
-    // 1. Either the empty grid has no cells
-    //    (so there's nothing to fill, so just return it), or
-    // 2. The "empty" grid is completely filled with just the initial values
-    //    (and we should just return it, too).
-    if (firstCell === null) return [grid];
-
-    const solutions: IGrid[] = [];
-
-    const _isSudokuValid = (currentGrid: IGrid, currentCell: IGridCell): boolean => {
-        // Try every available guess in the current cell.
-        const availableGuesses: Set<number> = currentGrid.getAvailableGuesses(currentCell);
-
-        // EXIT CONDITION [INVALID] - cell cannot be filled at all.
-        if (availableGuesses.size === 0) {
-            return false;
-        }
-
-        let nextGrid: IGrid = currentGrid, nextCell: IGridCell | null = null;
-
-        // SMALL OPTIMIZATION - If there is only one possible guess,
-        // we can just add it to the grid without having to copy it.
-        if (availableGuesses.size === 1) {
-            const value: number = availableGuesses.values().next().value!;
-            currentCell.setValue(value);
-            nextCell = nextGrid.getNextEmptyCell(currentCell);
-        } else {
-            availableGuesses.forEach((value: number): void => {
-                // If there are multiple (possible) guesses,
-                // each one should be added to a copy of the current grid,
-                // in order to avoid different backtracking recursions
-                // iterating over the same grid.
-                nextGrid = currentGrid.getCopy();
-                // As we're now iterating over a different grid,
-                // the "current" cell is now the first empty cell of this grid
-                // (and is not null).
-                const currentCellCopy: IGridCell = nextGrid.getFirstEmptyCell()!;
-                currentCellCopy.setValue(value);
-                nextCell = nextGrid.getNextEmptyCell(currentCellCopy);
-            });
-        }
-
-        // EXIT CONDITION [VALID] - there is no next cell,
-        // so the grid is completely filled with valid guesses.
-        if (nextCell === null) {
-            solutions.push(nextGrid);
-            return true;
-        }
-
-        return _isSudokuValid(nextGrid, nextCell);
+  const _recursiveBacktracking = (currentGrid: IGrid): void => {
+    // OPTIMIZATION: fill all single guesses in-place,
+    // and if this is enough to solve the grid, return it.
+    const fullySolved = fillSingleGuesses(currentGrid);
+    if (fullySolved) {
+      solutions.push(currentGrid);
+      return;
     }
 
-    // RECURSION CALL
-    _isSudokuValid(emptyGrid, firstCell);
+    // After the first optimization, this next cell cannot be null.
+    const firstCell = currentGrid.getFirstEmptyCell()!;
+    const availableGuesses: Set<number> = currentGrid.getAvailableGuesses(firstCell);
 
-    return solutions;
+    // EXIT CONDITION [INVALID] - cell cannot be filled at all.
+    if (availableGuesses.size === 0) {
+      return;
+    }
+
+    // Code needs to get to this very point
+    // in order to require backtracking.
+    backtrackingNeeded = true;
+
+    availableGuesses.forEach((value: number): void => {
+      // If there are multiple (possible) guesses,
+      // each one should be added to a copy of the current grid,
+      // in order to avoid different backtracking recursions
+      // iterating over the same grid.
+      const copyCurrentGrid = currentGrid.getCopy();
+
+      // As we're now iterating over a different grid,
+      // the "current" cell is now the first empty cell of this grid
+      // (and is not null).
+      const copyFirstCell: IGridCell = copyCurrentGrid.getFirstEmptyCell()!;
+      copyFirstCell.setValue(value);
+      _recursiveBacktracking(copyCurrentGrid);
+    });
+  }
+
+  // RECURSION CALL
+  _recursiveBacktracking(emptyGrid);
+  return [solutions, backtrackingNeeded];
 }

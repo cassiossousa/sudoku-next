@@ -17,7 +17,6 @@ export function fillSingleGuesses(grid: IGrid): boolean {
     if (availableGuesses.size === 1) {
       currentCell.setValue(availableGuesses.values().next().value!);
       const nextCell = grid.getFirstEmptyCell();
-      console.log(currentCell.print(), nextCell === null);
       return _fillSingleGuesses(nextCell, true);
     } else {
       return _fillSingleGuesses(grid.getNextEmptyCell(currentCell), false);
