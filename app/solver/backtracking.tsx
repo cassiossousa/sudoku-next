@@ -17,6 +17,17 @@ import { fillSingleGuesses } from "./single-guess";
  * 5.2. If there is a next cell, you then do the same loop on step 4;
  * 6. Repeat this process until you exhaust all possible ways to fill the board;
  * 7. Return every valid grid you found (if any).
+ * 
+ * This is a brute-force algorithm, even if we optimize the way we
+ * iterate over guessing trees or fill more trivial cells faster.
+ * In case the grid is too complex or allows for too many solutions,
+ * remember that this algorithm can and will try to find EVERY ONE OF THEM.
+ * 
+ * The complexity of each unknown cell is closer to multiplicative than additive,
+ * as any cell with multiple available guesses must be tested for all values.
+ * This means that the worst-case complexity is closer to O(exp(N)), N being the amount
+ * of unknown cells. Any grid with less-than-17 values (guaranteed to have multiple
+ * solutions) could easily take hours or over millions of years to be fully solved.
  */
 export function solveByBacktracking(grid: IGrid): [IGrid[], boolean] {
   const emptyGrid = grid.getEmptyCopy();

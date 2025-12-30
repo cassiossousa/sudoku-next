@@ -23,5 +23,7 @@ export function fillSingleGuesses(grid: IGrid): boolean {
     }
   }
 
-  return _fillSingleGuesses(grid.getFirstEmptyCell(), false);
+  // We start with true because there is always the possibility
+  // that the grid is already fully solved.
+  return _fillSingleGuesses(grid.getFirstEmptyCell(), true);
 }
