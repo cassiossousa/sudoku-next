@@ -2,6 +2,25 @@ import { SudokuGrid } from "../sudoku/sudoku";
 import { solveByBacktracking } from "./backtracking";
 
 describe('solveByBacktracking()', () => {
+  it('returns the Sudoku grid itself if the game is already solved', () => {
+    const sudoku: SudokuGrid = new SudokuGrid([
+      [6, 9, 2, 4, 1, 5, 3, 7, 8],
+      [8, 1, 5, 7, 6, 3, 4, 2, 9],
+      [7, 3, 4, 9, 2, 8, 5, 6, 1],
+      [5, 7, 3, 2, 8, 4, 1, 9, 6],
+      [1, 2, 8, 3, 9, 6, 7, 4, 5],
+      [9, 4, 6, 1, 5, 7, 8, 3, 2],
+      [3, 5, 1, 6, 7, 2, 9, 8, 4],
+      [4, 6, 9, 8, 3, 1, 2, 5, 7],
+      [2, 8, 7, 5, 4, 9, 6, 1, 3],
+    ]);
+
+    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    expect(backtrackingNeeded).toBe(false);
+    expect(solutions.length).toBe(1);
+    expect(solutions[0]).toEqual(sudoku);
+  });
+
   it('short-circuits easy Sudoku games that can be solved via single-guess cells only', () => {
     const sudoku = new SudokuGrid([
       [6, 0, 2, 4, 1, 0, 0, 0, 8],
