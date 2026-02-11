@@ -123,26 +123,6 @@ describe('solveByBacktracking()', () => {
     expect(firstGame.print()).toBe(
       "-------------\n" +
       "|295|743|861|\n" +
-      "|431|865|927|\n" +
-      "|876|192|543|\n" +
-      "-------------\n" +
-      "|387|459|216|\n" +
-      "|612|387|495|\n" +
-      "|549|216|738|\n" +
-      "-------------\n" +
-      "|763|534|189|\n" +
-      "|928|671|354|\n" +
-      "|154|938|672|\n" +
-      "-------------"
-    );
-
-    const [secondGame, secondGameSteps] = solutions[1];
-    expect(secondGameSteps.length).toBe(4);
-    expect(secondGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
-    expect(secondGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
-    expect(secondGame.print()).toBe(
-      "-------------\n" +
-      "|295|743|861|\n" +
       "|431|865|972|\n" +
       "|876|192|543|\n" +
       "-------------\n" +
@@ -153,6 +133,26 @@ describe('solveByBacktracking()', () => {
       "|763|534|189|\n" +
       "|928|671|354|\n" +
       "|154|938|627|\n" +
+      "-------------"
+    );
+
+    const [secondGame, secondGameSteps] = solutions[1];
+    expect(secondGameSteps.length).toBe(4);
+    expect(secondGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
+    expect(secondGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
+    expect(secondGame.print()).toBe(
+      "-------------\n" +
+      "|295|743|861|\n" +
+      "|431|865|927|\n" +
+      "|876|192|543|\n" +
+      "-------------\n" +
+      "|387|459|216|\n" +
+      "|612|387|495|\n" +
+      "|549|216|738|\n" +
+      "-------------\n" +
+      "|763|534|189|\n" +
+      "|928|671|354|\n" +
+      "|154|938|672|\n" +
       "-------------"
     );
   });

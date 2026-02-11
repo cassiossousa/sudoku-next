@@ -27,12 +27,17 @@ import { SolverStep } from "./step";
  * The complexity of each unknown cell is closer to multiplicative than additive,
  * as any cell with multiple available guesses must be tested for all values.
  * This means that the worst-case complexity is closer to O(exp(N)), N being the amount
- * of unknown cells. Any grid with less-than-17 values (guaranteed to have multiple
+ * of unknown cells.
+ * 
+ * Any grid with less-than-17 values (guaranteed to have multiple
  * solutions) could easily take hours or over millions of years to be fully solved.
+ * 
+ * A grid with exactly 17 digits and one solution takes a few minutes to be solved.
  */
 export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], boolean] {
   const emptyGrid = grid.getEmptyCopy();
   const solutions: [IGrid, SolverStep[]][] = [];
+  const bifurcationsInCourse: [IGrid, SolverStep[]][] = [];
   let backtrackingNeeded = false;
 
   const _recursiveBacktracking = (currentGrid: IGrid, currentSteps: SolverStep[]): void => {
@@ -58,11 +63,13 @@ export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], bool
       return;
     }
 
-    availableGuesses.forEach((value: number): void => {
-      // If there are multiple (possible) guesses,
-      // each one should be added to a copy of the current grid,
-      // in order to avoid different backtracking recursions
-      // iterating over the same grid.
+    // In order to get here, you need to have at least 2 guesses
+    // for the cell (as single guesses are filled first, and
+    // zero guesses are invalid/undesirable states), so
+    // we will always reach a bifurcation.
+    availableGuesses.forEach((value: number, idx: number): void => {
+      // Each bifurcation requires its own copy of the current grid
+      // to avoid memory concurrency by different guesses.
       const copyCurrentGrid = currentGrid.getCopy();
 
       // As we're now iterating over a different grid,
@@ -77,15 +84,32 @@ export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], bool
         value
       };
 
-      _recursiveBacktracking(copyCurrentGrid, [
-        ...currentSteps,
-        ...singleGuessSteps,
-        backtrackingStep,
-      ]);
+      if (idx === 0) {
+        _recursiveBacktracking(copyCurrentGrid, [
+          ...currentSteps,
+          ...singleGuessSteps,
+          backtrackingStep,
+        ]);
+      } else {
+        bifurcationsInCourse.push([
+          copyCurrentGrid,
+          [
+            ...currentSteps,
+            ...singleGuessSteps,
+            backtrackingStep,
+          ]
+        ])
+      }
     });
   }
 
   // RECURSION CALL
   _recursiveBacktracking(emptyGrid, []);
+
+  while(bifurcationsInCourse.length > 0) {
+    const [grid, steps]: [IGrid, SolverStep[]] = bifurcationsInCourse.pop()!;
+    _recursiveBacktracking(grid, steps);
+  }
+
   return [solutions, backtrackingNeeded];
 }
