@@ -43,6 +43,8 @@ export interface IGrid {
   getEmptyCopy(): IGrid;
   getCopy(): IGrid;
   getAvailableGuesses(cell: IGridCell): Set<number>;
+  findCellPosition(cell: IGridCell): number[] | null;
+  findCellByPosition(cellPosition: number[]): IGridCell | null;
   print(): string;
 }
 
@@ -82,6 +84,11 @@ export class SudokuGrid implements IGrid {
     return null;
   }
 
+  findCellByPosition(cellPosition: number[]): IGridCell | null {
+    const [row, col] = cellPosition;
+    return this.grid[row][col] || null;
+  }
+
   getNextEmptyCell(cell: IGridCell): IGridCell | null {
     const cellPosition: number[] | null = this.findCellPosition(cell);
     if (cellPosition === null) return null;
@@ -100,6 +107,7 @@ export class SudokuGrid implements IGrid {
         }
       }
     }
+
     return null;
   }
 

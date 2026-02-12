@@ -62,6 +62,8 @@ export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], bool
     if (availableGuesses.size === 0) {
       return;
     }
+    
+    const firstCellPosition: number[] = currentGrid.findCellPosition(firstCell)!;
 
     // In order to get here, you need to have at least 2 guesses
     // for the cell (as single guesses are filled first, and
@@ -69,36 +71,40 @@ export function solveByBacktracking(grid: IGrid): [[IGrid, SolverStep[]][], bool
     // we will always reach a bifurcation.
     availableGuesses.forEach((value: number, idx: number): void => {
       // Each bifurcation requires its own copy of the current grid
-      // to avoid memory concurrency by different guesses.
-      const copyCurrentGrid = currentGrid.getCopy();
+      // to avoid memory concurrency by different guesses. The first
+      // grid may keep its reference throughtout the recursion.
+      let gridToIterate: IGrid;
 
-      // As we're now iterating over a different grid,
-      // the "current" cell is now the first empty cell of this grid
-      // (and is not null).
-      const copyFirstCell: IGridCell = copyCurrentGrid.getFirstEmptyCell()!;
-      copyFirstCell.setValue(value);
+      if (idx === 0) {
+        gridToIterate = currentGrid;
+      } else {
+        gridToIterate = currentGrid.getCopy();
+      }
+
+      // We're getting a cell based on the original grid's
+      // cell position, so we know it's not null.
+      const firstCellToIterate: IGridCell = gridToIterate.findCellByPosition(
+        firstCellPosition
+      )!;
+  
+      firstCellToIterate.setValue(value);
 
       const backtrackingStep: SolverStep = {
         solverType: 'backtracking',
-        position: copyFirstCell.getPosition(),
+        position: firstCellPosition,
         value
       };
 
+      const steps: SolverStep[] = [
+        ...currentSteps,
+        ...singleGuessSteps,
+        backtrackingStep,
+      ];
+
       if (idx === 0) {
-        _recursiveBacktracking(copyCurrentGrid, [
-          ...currentSteps,
-          ...singleGuessSteps,
-          backtrackingStep,
-        ]);
+        _recursiveBacktracking(gridToIterate, steps);
       } else {
-        bifurcationsInCourse.push([
-          copyCurrentGrid,
-          [
-            ...currentSteps,
-            ...singleGuessSteps,
-            backtrackingStep,
-          ]
-        ])
+        bifurcationsInCourse.push([gridToIterate, steps]);
       }
     });
   }
