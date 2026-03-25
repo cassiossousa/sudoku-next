@@ -13,15 +13,20 @@ export class SudokuGridCell implements IGridCell {
   initialValue: number | null;
   value: number | null;
 
-  constructor(row: number, col: number, initialValue: number | null, value?: number | null) {
+  constructor(
+    row: number,
+    col: number,
+    initialValue: number | null,
+    value?: number | null,
+  ) {
     this.row = row;
     this.col = col;
     this.initialValue = initialValue;
-    this.value = initialValue ? null : (value || null);
+    this.value = initialValue ? null : value || null;
   }
 
   hasInitialValue(): boolean {
-    return Boolean(this.initialValue);    
+    return Boolean(this.initialValue);
   }
 
   getValue(): number | null {
@@ -52,7 +57,10 @@ export class SudokuGrid implements IGrid {
   grid: IGridCell[][];
   initialValues: (number | null)[][];
 
-  constructor(initialValues: (number | null)[][], values?: (number | null)[][]) {
+  constructor(
+    initialValues: (number | null)[][],
+    values?: (number | null)[][],
+  ) {
     this.grid = [];
     this.initialValues = initialValues;
     for (let row = 0; row < 9; row++) {
@@ -118,11 +126,11 @@ export class SudokuGrid implements IGrid {
   getCurrentValues(): (number | null)[][] {
     const currentValues: (number | null)[][] = [];
     for (let row = 0; row < 9; row++) {
-        currentValues.push([]);
-        for (let col = 0; col < 9; col++) {
-            const currentValue = this.grid[row][col].getValue();
-            currentValues[row].push(currentValue);
-        }
+      currentValues.push([]);
+      for (let col = 0; col < 9; col++) {
+        const currentValue = this.grid[row][col].getValue();
+        currentValues[row].push(currentValue);
+      }
     }
     return currentValues;
   }
@@ -148,7 +156,7 @@ export class SudokuGrid implements IGrid {
     }
     return availableGuesses;
   }
-    
+
   getAvailableGuessesInBox(row: number, col: number): Set<number> {
     const availableGuesses: Set<number> = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     const startRow = 3 * Math.floor(row / 3);
@@ -176,14 +184,9 @@ export class SudokuGrid implements IGrid {
     const availableValuesInBox = this.getAvailableGuessesInBox(row, col);
 
     return new Set(
-      [...availableValuesInBox].filter(
-        (val: number) => {
-          return (
-            availableValuesInRow.has(val) &&
-            availableValuesInCol.has(val)
-          )
-        }
-      )
+      [...availableValuesInBox].filter((val: number) => {
+        return availableValuesInRow.has(val) && availableValuesInCol.has(val);
+      }),
     );
   }
 
@@ -195,12 +198,12 @@ export class SudokuGrid implements IGrid {
       for (let col = 0; col < 9; col++) {
         if (col % 3 === 0) sudokuPartsRow.push(`|`);
         const value: number | null = this.grid[row][col].getValue();
-        sudokuPartsRow.push(`${value || " "}`);
+        sudokuPartsRow.push(`${value || ' '}`);
       }
       sudokuPartsRow.push('|');
-      sudokuParts.push(sudokuPartsRow.join(''))
+      sudokuParts.push(sudokuPartsRow.join(''));
     }
-    sudokuParts.push(`-------------`)
+    sudokuParts.push(`-------------`);
     return sudokuParts.join(`\n`);
   }
 }

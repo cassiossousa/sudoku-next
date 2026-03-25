@@ -1,5 +1,5 @@
-import { SudokuGrid } from "../sudoku/sudoku";
-import { solveByBacktracking } from "./backtracking";
+import { SudokuGrid } from '../sudoku/sudoku';
+import { solveByBacktracking } from './backtracking';
 
 describe('solveByBacktracking()', () => {
   it('returns the Sudoku grid itself if the game is already solved', () => {
@@ -43,21 +43,23 @@ describe('solveByBacktracking()', () => {
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(43);
-    expect(steps.filter(step => step.solverType === 'single-guess').length).toBe(43);
+    expect(
+      steps.filter((step) => step.solverType === 'single-guess').length,
+    ).toBe(43);
     expect(solvedGame.print()).toBe(
-      "-------------\n" +
-      "|692|415|378|\n" +
-      "|815|763|429|\n" +
-      "|734|928|561|\n" +
-      "-------------\n" +
-      "|573|284|196|\n" +
-      "|128|396|745|\n" +
-      "|946|157|832|\n" +
-      "-------------\n" +
-      "|351|672|984|\n" +
-      "|469|831|257|\n" +
-      "|287|549|613|\n" +
-      "-------------"
+      '-------------\n' +
+        '|692|415|378|\n' +
+        '|815|763|429|\n' +
+        '|734|928|561|\n' +
+        '-------------\n' +
+        '|573|284|196|\n' +
+        '|128|396|745|\n' +
+        '|946|157|832|\n' +
+        '-------------\n' +
+        '|351|672|984|\n' +
+        '|469|831|257|\n' +
+        '|287|549|613|\n' +
+        '-------------',
     );
   });
 
@@ -80,22 +82,26 @@ describe('solveByBacktracking()', () => {
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(53);
-    expect(steps.filter(step => step.solverType === 'single-guess').length).toBe(46);
-    expect(steps.filter(step => step.solverType === 'backtracking').length).toBe(7);
+    expect(
+      steps.filter((step) => step.solverType === 'single-guess').length,
+    ).toBe(46);
+    expect(
+      steps.filter((step) => step.solverType === 'backtracking').length,
+    ).toBe(7);
     expect(solvedGame.print()).toBe(
-      "-------------\n" +
-      "|649|831|257|\n" +
-      "|531|672|984|\n" +
-      "|827|549|613|\n" +
-      "-------------\n" +
-      "|218|396|745|\n" +
-      "|496|157|832|\n" +
-      "|753|284|196|\n" +
-      "-------------\n" +
-      "|374|928|561|\n" +
-      "|185|763|429|\n" +
-      "|962|415|378|\n" +
-      "-------------"
+      '-------------\n' +
+        '|649|831|257|\n' +
+        '|531|672|984|\n' +
+        '|827|549|613|\n' +
+        '-------------\n' +
+        '|218|396|745|\n' +
+        '|496|157|832|\n' +
+        '|753|284|196|\n' +
+        '-------------\n' +
+        '|374|928|561|\n' +
+        '|185|763|429|\n' +
+        '|962|415|378|\n' +
+        '-------------',
     );
   });
 
@@ -118,42 +124,54 @@ describe('solveByBacktracking()', () => {
 
     const [firstGame, firstGameSteps] = solutions[0];
     expect(firstGameSteps.length).toBe(4);
-    expect(firstGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
-    expect(firstGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
+    expect(
+      firstGameSteps.filter((step) => step.solverType === 'single-guess')
+        .length,
+    ).toBe(3);
+    expect(
+      firstGameSteps.filter((step) => step.solverType === 'backtracking')
+        .length,
+    ).toBe(1);
     expect(firstGame.print()).toBe(
-      "-------------\n" +
-      "|295|743|861|\n" +
-      "|431|865|972|\n" +
-      "|876|192|543|\n" +
-      "-------------\n" +
-      "|387|459|216|\n" +
-      "|612|387|495|\n" +
-      "|549|216|738|\n" +
-      "-------------\n" +
-      "|763|534|189|\n" +
-      "|928|671|354|\n" +
-      "|154|938|627|\n" +
-      "-------------"
+      '-------------\n' +
+        '|295|743|861|\n' +
+        '|431|865|972|\n' +
+        '|876|192|543|\n' +
+        '-------------\n' +
+        '|387|459|216|\n' +
+        '|612|387|495|\n' +
+        '|549|216|738|\n' +
+        '-------------\n' +
+        '|763|534|189|\n' +
+        '|928|671|354|\n' +
+        '|154|938|627|\n' +
+        '-------------',
     );
 
     const [secondGame, secondGameSteps] = solutions[1];
     expect(secondGameSteps.length).toBe(4);
-    expect(secondGameSteps.filter(step => step.solverType === 'single-guess').length).toBe(3);
-    expect(secondGameSteps.filter(step => step.solverType === 'backtracking').length).toBe(1);
+    expect(
+      secondGameSteps.filter((step) => step.solverType === 'single-guess')
+        .length,
+    ).toBe(3);
+    expect(
+      secondGameSteps.filter((step) => step.solverType === 'backtracking')
+        .length,
+    ).toBe(1);
     expect(secondGame.print()).toBe(
-      "-------------\n" +
-      "|295|743|861|\n" +
-      "|431|865|927|\n" +
-      "|876|192|543|\n" +
-      "-------------\n" +
-      "|387|459|216|\n" +
-      "|612|387|495|\n" +
-      "|549|216|738|\n" +
-      "-------------\n" +
-      "|763|534|189|\n" +
-      "|928|671|354|\n" +
-      "|154|938|672|\n" +
-      "-------------"
+      '-------------\n' +
+        '|295|743|861|\n' +
+        '|431|865|927|\n' +
+        '|876|192|543|\n' +
+        '-------------\n' +
+        '|387|459|216|\n' +
+        '|612|387|495|\n' +
+        '|549|216|738|\n' +
+        '-------------\n' +
+        '|763|534|189|\n' +
+        '|928|671|354|\n' +
+        '|154|938|672|\n' +
+        '-------------',
     );
   });
 });

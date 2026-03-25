@@ -1,5 +1,5 @@
-import { IGrid, IGridCell } from "../sudoku/sudoku";
-import { SolverStep } from "./step";
+import { IGrid, IGridCell } from '../sudoku/sudoku';
+import { SolverStep } from './step';
 
 /**
  * This is not exactly a solver, but given that some
@@ -13,7 +13,10 @@ import { SolverStep } from "./step";
 export function fillSingleGuesses(grid: IGrid): [boolean, SolverStep[]] {
   const solverSteps: SolverStep[] = [];
 
-  const _fillSingleGuesses = (currentCell: IGridCell | null, filledPreviousCell: boolean): boolean => {
+  const _fillSingleGuesses = (
+    currentCell: IGridCell | null,
+    filledPreviousCell: boolean,
+  ): boolean => {
     if (currentCell === null) return filledPreviousCell;
 
     const availableGuesses: Set<number> = grid.getAvailableGuesses(currentCell);
@@ -25,13 +28,13 @@ export function fillSingleGuesses(grid: IGrid): [boolean, SolverStep[]] {
         position: currentCell.getPosition(),
         value: cellValue,
       });
-  
+
       const nextCell = grid.getFirstEmptyCell();
       return _fillSingleGuesses(nextCell, true);
     } else {
       return _fillSingleGuesses(grid.getNextEmptyCell(currentCell), false);
     }
-  }
+  };
 
   // We start with true because there is always the possibility
   // that the grid starts fully solved.

@@ -1,4 +1,4 @@
-import { SudokuGrid, SudokuGridCell } from "./sudoku";
+import { SudokuGrid, SudokuGridCell } from './sudoku';
 
 describe('SudokuGrid', () => {
   let sudoku: SudokuGrid;
@@ -20,7 +20,7 @@ describe('SudokuGrid', () => {
   describe('getAvailableGuessesInRow()', () => {
     it('returns the proper guesses in the row', () => {
       expect(sudoku.getAvailableGuessesInRow(4)).toEqual(
-        new Set([1, 2, 3, 4, 6, 7])
+        new Set([1, 2, 3, 4, 6, 7]),
       );
     });
   });
@@ -28,7 +28,7 @@ describe('SudokuGrid', () => {
   describe('getAvailableGuessesInCol()', () => {
     it('returns the proper guesses in the column', () => {
       expect(sudoku.getAvailableGuessesInCol(1)).toEqual(
-        new Set([2, 4, 6, 7, 9])
+        new Set([2, 4, 6, 7, 9]),
       );
     });
   });
@@ -36,7 +36,7 @@ describe('SudokuGrid', () => {
   describe('getAvailableGuessesInBox()', () => {
     it('returns the proper guesses in the 3x3 box containing the position', () => {
       expect(sudoku.getAvailableGuessesInBox(4, 1)).toEqual(
-        new Set([1, 2, 4, 7, 9])
+        new Set([1, 2, 4, 7, 9]),
       );
     });
   });
@@ -44,9 +44,7 @@ describe('SudokuGrid', () => {
   describe('getAvailableGuesses()', () => {
     it('returns the proper guesses for a given cell', () => {
       const cell = sudoku.grid[4][1];
-      expect(sudoku.getAvailableGuesses(cell)).toEqual(
-        new Set([2, 4, 7])
-      );
+      expect(sudoku.getAvailableGuesses(cell)).toEqual(new Set([2, 4, 7]));
     });
 
     it('returns an empty set for a cell that does not belong to the grid', () => {
@@ -58,24 +56,24 @@ describe('SudokuGrid', () => {
       const cell = sudoku.grid[4][2];
       expect(sudoku.getAvailableGuesses(cell)).toEqual(new Set());
     });
-  })
+  });
 
   describe('print()', () => {
     it('prints the Sudoku properly', () => {
       expect(sudoku.print()).toBe(
         `-------------\n` +
-        `|6 2|41 |  8|\n` +
-        `| 15|7 3|  9|\n` +
-        `|734|  8| 6 |\n` +
-        `-------------\n` +
-        `|5 3|2 4|   |\n` +
-        `|  8| 9 |  5|\n` +
-        `|  6| 57| 3 |\n` +
-        `-------------\n` +
-        `| 5 | 7 |9 4|\n` +
-        `|4 9|   |25 |\n` +
-        `| 87|   |6 3|\n` +
-        `-------------`
+          `|6 2|41 |  8|\n` +
+          `| 15|7 3|  9|\n` +
+          `|734|  8| 6 |\n` +
+          `-------------\n` +
+          `|5 3|2 4|   |\n` +
+          `|  8| 9 |  5|\n` +
+          `|  6| 57| 3 |\n` +
+          `-------------\n` +
+          `| 5 | 7 |9 4|\n` +
+          `|4 9|   |25 |\n` +
+          `| 87|   |6 3|\n` +
+          `-------------`,
       );
     });
   });

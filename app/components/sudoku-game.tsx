@@ -1,6 +1,6 @@
-import { IGridCell, SudokuGrid } from "../sudoku/sudoku";
-import SudokuGameCell from "./sudoku-game-cell";
-import SudokuGameCellInitial from "./sudoku-game-cell-initial";
+import { IGridCell, SudokuGrid } from '../sudoku/sudoku';
+import SudokuGameCell from './sudoku-game-cell';
+import SudokuGameCellInitial from './sudoku-game-cell-initial';
 
 export default function SudokuGame() {
   const sudoku = new SudokuGrid([
@@ -16,55 +16,43 @@ export default function SudokuGame() {
   ]);
 
   return (
-    <div className={`border-black border`}>
-      <div className={`border-black border-2`}>
-      {
-        [0, 1, 2].map((boardRow: number) => (
-          <div
-            key={`box-row-${boardRow}`}
-            className="flex"
-          >
-          {
-            [0, 1, 2].map((boardCol: number) => (
+    <div className={`border`}>
+      <div className={`border-2`}>
+        {[0, 1, 2].map((boardRow: number) => (
+          <div key={`box-row-${boardRow}`} className="flex">
+            {[0, 1, 2].map((boardCol: number) => (
               <div
                 key={`box-${boardRow}-${boardCol}`}
-                className={`flex flex-col border-black border-2`}
+                className={`flex flex-col border-2`}
               >
                 {[0, 1, 2].map((boxRow: number) => (
-                  <div
-                    key={`box-row-${boxRow}`}
-                    className="flex"
-                  >
-                  {[0, 1, 2].map((boxCol: number) => {
-                    const row = boardRow * 3 + boxRow;
-                    const col = boardCol * 3 + boxCol;
-                    const cell = sudoku.grid[row][col];
-                    const value = cell.getValue();
-                    const hasInitialValue = cell.hasInitialValue();
-                    return hasInitialValue ? (
-                      <SudokuGameCellInitial
-                        key={`cell-${row}-${col}`}
-                        initialValue={value!}
-                      >
-                      </SudokuGameCellInitial>
-                    ) : (
-                      <SudokuGameCell
-                        key={`cell-${row}-${col}`}
-                        value={value}
-                        row={row}
-                        col={col}
-                      >
-                      </SudokuGameCell>
-                    )
-                  })}
+                  <div key={`box-row-${boxRow}`} className="flex">
+                    {[0, 1, 2].map((boxCol: number) => {
+                      const row = boardRow * 3 + boxRow;
+                      const col = boardCol * 3 + boxCol;
+                      const cell = sudoku.grid[row][col];
+                      const value = cell.getValue();
+                      const hasInitialValue = cell.hasInitialValue();
+                      return hasInitialValue ? (
+                        <SudokuGameCellInitial
+                          key={`cell-${row}-${col}`}
+                          initialValue={value!}
+                        ></SudokuGameCellInitial>
+                      ) : (
+                        <SudokuGameCell
+                          key={`cell-${row}-${col}`}
+                          value={value}
+                          row={row}
+                          col={col}
+                        ></SudokuGameCell>
+                      );
+                    })}
                   </div>
                 ))}
               </div>
-            ))
-          }
+            ))}
           </div>
-        ))
-      }
+        ))}
       </div>
     </div>
   );
