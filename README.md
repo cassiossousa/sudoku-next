@@ -1,7 +1,7 @@
 ---
 title: sudoku-next
 repo: https://github.com/cassiossousa/sudoku-next
-demo:
+demo: https://sudoku-next-neon.vercel.app/
 featured: true
 category: frontend
 technologies:
