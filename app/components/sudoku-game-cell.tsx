@@ -11,10 +11,13 @@ export default function SudokuGameCell({
 }) {
   return (
     <button
-      className="flex justify-center align-center border w-7 h-7 font-bold cursor-pointer"
-      onClick={() => alert('CLICKED ME')}
+      className="w-10 h-10 flex items-center justify-center border border-zinc-700
+                 text-sm font-medium
+                 hover:bg-zinc-800 focus:outline-none focus:bg-zinc-700
+                 transition-colors"
+      onClick={() => console.log(`Cell ${row}, ${col}`)}
     >
-      {value}
+      {value ?? ''}
     </button>
   );
 }
