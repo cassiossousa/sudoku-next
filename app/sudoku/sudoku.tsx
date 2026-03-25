@@ -3,7 +3,7 @@ export interface IGridCell {
   value: number | null;
   getValue(): number | null;
   hasInitialValue(): boolean;
-  setValue(value: number): void;
+  setValue(value: number | null): void;
   getPosition(): number[];
 }
 
@@ -33,7 +33,7 @@ export class SudokuGridCell implements IGridCell {
     return this.initialValue || this.value;
   }
 
-  setValue(value: number): void {
+  setValue(value: number | null): void {
     if (!this.initialValue) this.value = value;
   }
 
@@ -51,6 +51,7 @@ export interface IGrid {
   findCellPosition(cell: IGridCell): number[] | null;
   findCellByPosition(cellPosition: number[]): IGridCell | null;
   print(): string;
+  isInvalid(): [boolean, boolean[][]];
 }
 
 export class SudokuGrid implements IGrid {
@@ -205,5 +206,86 @@ export class SudokuGrid implements IGrid {
     }
     sudokuParts.push(`-------------`);
     return sudokuParts.join(`\n`);
+  }
+
+  isInvalid(): [boolean, boolean[][]] {
+    let isInvalid = false;
+
+    const createBooleanGrid = (rows: number, cols: number): boolean[][] =>
+      Array(rows)
+        .fill(false)
+        .map(() => Array(cols).fill(false));
+
+    const invalidCells: boolean[][] = createBooleanGrid(9, 9);
+
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (
+          this.isInvalidForRow(row) ||
+          this.isInvalidForCol(col) ||
+          this.isInvalidForBox(row, col)
+        ) {
+          isInvalid = true;
+          invalidCells[row][col] = true;
+        }
+      }
+    }
+
+    return [isInvalid, invalidCells];
+  }
+
+  isInvalidForRow(row: number): boolean {
+    const numbersInRow: Set<number> = new Set();
+
+    for (let col = 0; col < 9; col++) {
+      const value = this.grid[row][col].getValue();
+      if (value) {
+        if (numbersInRow.has(value)) {
+          return true;
+        } else {
+          numbersInRow.add(value);
+        }
+      }
+    }
+
+    return false;
+  }
+
+  isInvalidForCol(col: number): boolean {
+    const numbersInCol: Set<number> = new Set();
+
+    for (let row = 0; row < 9; row++) {
+      const value = this.grid[row][col].getValue();
+      if (value) {
+        if (numbersInCol.has(value)) {
+          return true;
+        } else {
+          numbersInCol.add(value);
+        }
+      }
+    }
+
+    return false;
+  }
+
+  isInvalidForBox(row: number, col: number): boolean {
+    const numbersInBox: Set<number> = new Set();
+    const startRow = 3 * Math.floor(row / 3);
+    const startCol = 3 * Math.floor(col / 3);
+
+    for (let r = startRow; r < startRow + 3; r++) {
+      for (let c = startCol; c < startCol + 3; c++) {
+        const currentValue = this.grid[r][c].getValue();
+        if (currentValue) {
+          if (numbersInBox.has(currentValue)) {
+            return true;
+          } else {
+            numbersInBox.add(currentValue);
+          }
+        }
+      }
+    }
+
+    return false;
   }
 }

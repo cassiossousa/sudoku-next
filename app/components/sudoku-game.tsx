@@ -1,8 +1,32 @@
+'use client';
+
+import { useState } from 'react';
 import { SudokuGrid } from '../sudoku/sudoku';
 import SudokuGameCell from './sudoku-game-cell';
 import SudokuGameCellInitial from './sudoku-game-cell-initial';
 
-export default function SudokuGame({ sudoku }: { sudoku: SudokuGrid }) {
+export default function SudokuGame({
+  initialValues,
+}: {
+  initialValues: number[][];
+}) {
+  const [sudoku, setSudoku] = useState<SudokuGrid>(
+    () => new SudokuGrid(initialValues),
+  );
+
+  function updateCell(row: number, col: number, value: number | null) {
+    setSudoku((currentSudoku) => {
+      const newSudoku = currentSudoku.getCopy();
+      const cell = newSudoku.findCellByPosition([row, col]);
+      if (cell) {
+        cell.setValue(value);
+      }
+      return newSudoku as SudokuGrid;
+    });
+  }
+
+  const [isInvalid, invalidCells] = sudoku.isInvalid();
+
   return (
     <div className="border-4 border-zinc-700 rounded-lg overflow-hidden shadow-lg">
       {[0, 1, 2].map((boardRow) => (
@@ -17,7 +41,7 @@ export default function SudokuGame({ sudoku }: { sudoku: SudokuGrid }) {
                   {[0, 1, 2].map((boxCol) => {
                     const row = boardRow * 3 + boxRow;
                     const col = boardCol * 3 + boxCol;
-                    const cell = sudoku.grid[row][col];
+                    const cell = sudoku.findCellByPosition([row, col])!;
                     const value = cell.getValue();
                     const hasInitialValue = cell.hasInitialValue();
 
@@ -25,6 +49,7 @@ export default function SudokuGame({ sudoku }: { sudoku: SudokuGrid }) {
                       <SudokuGameCellInitial
                         key={`${row}-${col}`}
                         initialValue={value!}
+                        isInvalid={isInvalid && invalidCells[row][col]}
                       />
                     ) : (
                       <SudokuGameCell
@@ -32,6 +57,8 @@ export default function SudokuGame({ sudoku }: { sudoku: SudokuGrid }) {
                         value={value}
                         row={row}
                         col={col}
+                        isInvalid={isInvalid && invalidCells[row][col]}
+                        onChange={updateCell}
                       />
                     );
                   })}
