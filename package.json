@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/cassiossousa/sudoku-next.git"
   },
-  "homepage": "https://cassiossousa.github.io/sudoku-next/",
+  "homepage": "https://sudoku-next-neon.vercel.app/",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
