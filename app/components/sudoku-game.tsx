@@ -2,19 +2,7 @@ import { SudokuGrid } from '../sudoku/sudoku';
 import SudokuGameCell from './sudoku-game-cell';
 import SudokuGameCellInitial from './sudoku-game-cell-initial';
 
-export default function SudokuGame() {
-  const sudoku = new SudokuGrid([
-    [0, 4, 0, 8, 0, 0, 2, 0, 0],
-    [5, 3, 0, 0, 0, 0, 0, 0, 4],
-    [8, 0, 0, 5, 0, 9, 0, 1, 0],
-    [2, 0, 0, 0, 0, 0, 0, 4, 5],
-    [4, 9, 0, 0, 0, 0, 8, 3, 0],
-    [0, 0, 0, 0, 0, 0, 1, 0, 6],
-    [3, 0, 0, 0, 2, 0, 5, 0, 0],
-    [1, 0, 0, 0, 6, 0, 0, 2, 0],
-    [0, 6, 0, 0, 0, 5, 3, 0, 0],
-  ]);
-
+export default function SudokuGame({ sudoku }: { sudoku: SudokuGrid }) {
   return (
     <div className="border-4 border-zinc-700 rounded-lg overflow-hidden shadow-lg">
       {[0, 1, 2].map((boardRow) => (
