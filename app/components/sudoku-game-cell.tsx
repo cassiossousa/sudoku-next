@@ -34,7 +34,7 @@ export default function SudokuCell({
   }
 
   const baseStyles =
-    'w-12 h-12 flex items-center justify-center border text-xl font-semibold transition-colors focus:outline-none';
+    'w-9 h-9 md:w-12 md:h-12 flex items-center justify-center border text-base md:text-xl font-semibold transition-colors focus:outline-none';
 
   const stateStyles = isInitial
     ? 'bg-zinc-800 text-blue-400 border-zinc-700'

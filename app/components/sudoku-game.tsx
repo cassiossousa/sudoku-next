@@ -88,7 +88,7 @@ export default function SudokuGame({
   const [isInvalid, invalidCells] = sudoku.isInvalid();
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 items-center">
+    <div className="flex flex-col md:flex-row gap-6 items-center w-full max-w-full px-2">
       {/* GRID */}
       <div className="border-4 border-zinc-700 rounded-lg overflow-visible shadow-lg">
         {[0, 1, 2].map((boardRow) => (

@@ -16,7 +16,7 @@ export default function SudokuControls({
   setSpeed: (v: number) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full max-w-md">
       {/* NUMBER INPUT */}
       <div
         className={`
@@ -28,7 +28,7 @@ export default function SudokuControls({
           <button
             key={n}
             onClick={() => onInput(n)}
-            className="h-10 w-10 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-lg font-semibold"
+            className="h-10 w-full md:w-10 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-base md:text-lg font-semibold"
           >
             {n}
           </button>
@@ -69,6 +69,7 @@ export default function SudokuControls({
           step={50}
           value={speed}
           onChange={(e) => setSpeed(Number(e.target.value))}
+          className="w-full"
         />
       </div>
     </div>
