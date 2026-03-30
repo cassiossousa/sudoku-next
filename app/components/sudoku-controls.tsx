@@ -1,20 +1,23 @@
 'use client';
 
-export default function SudokuNumpad({
+export default function SudokuControls({
   onInput,
   onSolve,
+  onRestart,
   disabled,
   speed,
   setSpeed,
 }: {
   onInput: (value: number | null) => void;
   onSolve: () => void;
+  onRestart: () => void;
   disabled: boolean;
   speed: number;
   setSpeed: (v: number) => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
+      {/* NUMBER INPUT */}
       <div
         className={`
           grid grid-cols-9 md:grid-cols-3 gap-2
@@ -39,15 +42,24 @@ export default function SudokuNumpad({
         </button>
       </div>
 
-      {/* Solve button (always active) */}
-      <button
-        onClick={onSolve}
-        className="h-10 bg-yellow-500/20 hover:bg-yellow-500/30 rounded text-sm font-semibold"
-      >
-        Solve
-      </button>
+      {/* ACTIONS */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={onSolve}
+          className="h-10 bg-yellow-500/20 hover:bg-yellow-500/30 rounded text-sm font-semibold"
+        >
+          Solve
+        </button>
 
-      {/* Speed control */}
+        <button
+          onClick={onRestart}
+          className="h-10 bg-zinc-700 hover:bg-zinc-600 rounded text-sm font-semibold"
+        >
+          Restart
+        </button>
+      </div>
+
+      {/* SPEED CONTROL */}
       <div className="flex flex-col gap-2 text-xs">
         <label>Solving speed: {(speed / 1000).toFixed(2)}s</label>
         <input

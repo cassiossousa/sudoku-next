@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { SudokuGrid } from '../sudoku/sudoku';
 import SudokuCell from './sudoku-game-cell';
-import SudokuNumpad from './sudoku-numpad';
+import SudokuControls from './sudoku-controls';
 import { solveByBacktracking } from '../solver/backtracking';
 
 export default function SudokuGame({
@@ -44,6 +44,13 @@ export default function SudokuGame({
     updateCell(selected.row, selected.col, value);
   }
 
+  function handleRestart() {
+    solvingRef.current = false;
+    setSudoku(new SudokuGrid(initialValues));
+    setHighlighted(Array.from({ length: 9 }, () => Array(9).fill(false)));
+    setSelected(null);
+  }
+
   async function handleSolve() {
     if (solvingRef.current) return;
     solvingRef.current = true;
@@ -51,9 +58,8 @@ export default function SudokuGame({
     const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
     const [solvedGrid, steps] = solutions[0];
 
-    // 1. Reset to initial values only
-    setSudoku(new SudokuGrid(initialValues));
-    setHighlighted(Array.from({ length: 9 }, () => Array(9).fill(false)));
+    // 1. Reset first
+    handleRestart();
 
     // 2. Play steps
     for (const step of steps) {
@@ -127,10 +133,11 @@ export default function SudokuGame({
         ))}
       </div>
 
-      {/* NUMPAD */}
-      <SudokuNumpad
+      {/* CONTROLS */}
+      <SudokuControls
         onInput={handleNumberInput}
         onSolve={handleSolve}
+        onRestart={handleRestart}
         disabled={!selected}
         speed={speed}
         setSpeed={setSpeed}
