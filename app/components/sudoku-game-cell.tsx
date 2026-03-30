@@ -1,19 +1,27 @@
 'use client';
 
-export default function SudokuGameCell({
+export default function SudokuCell({
   value,
   row,
   col,
+  isInitial,
+  isSelected,
   isInvalid,
+  onSelect,
   onChange,
 }: {
   value: number | null;
   row: number;
   col: number;
+  isInitial: boolean;
+  isSelected: boolean;
   isInvalid: boolean;
+  onSelect: (pos: { row: number; col: number }) => void;
   onChange: (row: number, col: number, value: number | null) => void;
 }) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
+    if (isInitial) return;
+
     if (e.key >= '1' && e.key <= '9') {
       onChange(row, col, Number(e.key));
     }
@@ -23,19 +31,32 @@ export default function SudokuGameCell({
     }
   }
 
+  const baseStyles =
+    'w-12 h-12 flex items-center justify-center border text-xl font-semibold transition-colors focus:outline-none';
+
+  const stateStyles = isInitial
+    ? 'bg-zinc-800 text-blue-400 border-zinc-700'
+    : 'border-zinc-700 hover:bg-zinc-800 focus:bg-zinc-700';
+
+  const invalidStyles = isInvalid
+    ? 'border-red-400 bg-red-500/10 text-red-300'
+    : '';
+
+  const selectedStyles = isSelected
+    ? `
+      ring-2 ring-blue-400
+      outline outline-2 outline-blue-400
+      outline-offset-[-2px]
+      relative z-10
+    `
+    : '';
+
   return (
     <button
       tabIndex={0}
+      onClick={() => onSelect({ row, col })}
       onKeyDown={handleKeyDown}
-      className={`w-10 h-10 flex items-center justify-center border
-        text-sm font-medium transition-colors
-        focus:outline-none
-        ${
-          isInvalid
-            ? 'border-red-400 bg-red-500/10 text-red-300 focus:bg-red-500/20'
-            : 'border-zinc-700 hover:bg-zinc-800 focus:bg-zinc-700'
-        }
-      `}
+      className={`${baseStyles} ${stateStyles} ${invalidStyles} ${selectedStyles}`}
     >
       {value ?? ''}
     </button>

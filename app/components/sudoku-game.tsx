@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { SudokuGrid } from '../sudoku/sudoku';
-import SudokuGameCell from './sudoku-game-cell';
-import SudokuGameCellInitial from './sudoku-game-cell-initial';
+import SudokuCell from './sudoku-game-cell';
+import SudokuNumpad from './sudoku-numpad';
 
 export default function SudokuGame({
   initialValues,
@@ -14,60 +14,75 @@ export default function SudokuGame({
     () => new SudokuGrid(initialValues),
   );
 
+  const [selected, setSelected] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+
   function updateCell(row: number, col: number, value: number | null) {
     setSudoku((currentSudoku) => {
       const newSudoku = currentSudoku.getCopy();
       const cell = newSudoku.findCellByPosition([row, col]);
-      if (cell) {
+      if (cell && !cell.hasInitialValue()) {
         cell.setValue(value);
       }
       return newSudoku as SudokuGrid;
     });
   }
 
+  function handleNumberInput(value: number | null) {
+    if (!selected) return;
+    updateCell(selected.row, selected.col, value);
+  }
+
   const [isInvalid, invalidCells] = sudoku.isInvalid();
 
   return (
-    <div className="border-4 border-zinc-700 rounded-lg overflow-hidden shadow-lg">
-      {[0, 1, 2].map((boardRow) => (
-        <div key={boardRow} className="flex">
-          {[0, 1, 2].map((boardCol) => (
-            <div
-              key={`${boardRow}-${boardCol}`}
-              className="flex flex-col border-r-2 border-b-2 border-zinc-700 last:border-r-0"
-            >
-              {[0, 1, 2].map((boxRow) => (
-                <div key={boxRow} className="flex">
-                  {[0, 1, 2].map((boxCol) => {
-                    const row = boardRow * 3 + boxRow;
-                    const col = boardCol * 3 + boxCol;
-                    const cell = sudoku.findCellByPosition([row, col])!;
-                    const value = cell.getValue();
-                    const hasInitialValue = cell.hasInitialValue();
+    <div className="flex flex-col md:flex-row gap-6 items-center">
+      {/* GRID */}
+      <div className="border-4 border-zinc-700 rounded-lg overflow-visible shadow-lg">
+        {[0, 1, 2].map((boardRow) => (
+          <div key={boardRow} className="flex">
+            {[0, 1, 2].map((boardCol) => (
+              <div
+                key={`${boardRow}-${boardCol}`}
+                className="flex flex-col border-r-2 border-b-2 border-zinc-700 last:border-r-0"
+              >
+                {[0, 1, 2].map((boxRow) => (
+                  <div key={boxRow} className="flex">
+                    {[0, 1, 2].map((boxCol) => {
+                      const row = boardRow * 3 + boxRow;
+                      const col = boardCol * 3 + boxCol;
 
-                    return hasInitialValue ? (
-                      <SudokuGameCellInitial
-                        key={`${row}-${col}`}
-                        initialValue={value!}
-                        isInvalid={isInvalid && invalidCells[row][col]}
-                      />
-                    ) : (
-                      <SudokuGameCell
-                        key={`${row}-${col}`}
-                        value={value}
-                        row={row}
-                        col={col}
-                        isInvalid={isInvalid && invalidCells[row][col]}
-                        onChange={updateCell}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
+                      const cell = sudoku.findCellByPosition([row, col])!;
+                      const value = cell.getValue();
+                      const isInitial = cell.hasInitialValue();
+
+                      return (
+                        <SudokuCell
+                          key={`${row}-${col}`}
+                          value={value}
+                          row={row}
+                          col={col}
+                          isInitial={isInitial}
+                          isSelected={
+                            selected?.row === row && selected?.col === col
+                          }
+                          isInvalid={isInvalid && invalidCells[row][col]}
+                          onSelect={setSelected}
+                          onChange={updateCell}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <SudokuNumpad disabled={!selected} onInput={handleNumberInput} />
     </div>
   );
 }
