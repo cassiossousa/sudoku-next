@@ -7,6 +7,7 @@ export default function SudokuCell({
   isInitial,
   isSelected,
   isInvalid,
+  isHighlighted,
   onSelect,
   onChange,
 }: {
@@ -16,6 +17,7 @@ export default function SudokuCell({
   isInitial: boolean;
   isSelected: boolean;
   isInvalid: boolean;
+  isHighlighted: boolean;
   onSelect: (pos: { row: number; col: number }) => void;
   onChange: (row: number, col: number, value: number | null) => void;
 }) {
@@ -43,12 +45,11 @@ export default function SudokuCell({
     : '';
 
   const selectedStyles = isSelected
-    ? `
-      ring-2 ring-blue-400
-      outline outline-2 outline-blue-400
-      outline-offset-[-2px]
-      relative z-10
-    `
+    ? 'ring-2 ring-blue-400 outline outline-2 outline-blue-400 outline-offset-[-2px] relative z-10'
+    : '';
+
+  const highlightedStyles = isHighlighted
+    ? 'bg-yellow-400/30 border-yellow-400'
     : '';
 
   return (
@@ -56,7 +57,7 @@ export default function SudokuCell({
       tabIndex={0}
       onClick={() => onSelect({ row, col })}
       onKeyDown={handleKeyDown}
-      className={`${baseStyles} ${stateStyles} ${invalidStyles} ${selectedStyles}`}
+      className={`${baseStyles} ${stateStyles} ${invalidStyles} ${selectedStyles} ${highlightedStyles}`}
     >
       {value ?? ''}
     </button>

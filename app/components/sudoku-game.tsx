@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { SudokuGrid } from '../sudoku/sudoku';
 import SudokuCell from './sudoku-game-cell';
 import SudokuNumpad from './sudoku-numpad';
+import { solveByBacktracking } from '../solver/backtracking';
 
 export default function SudokuGame({
   initialValues,
@@ -19,6 +20,14 @@ export default function SudokuGame({
     col: number;
   } | null>(null);
 
+  const [highlighted, setHighlighted] = useState<boolean[][]>(
+    Array.from({ length: 9 }, () => Array(9).fill(false)),
+  );
+
+  const [speed, setSpeed] = useState(500); // ms
+
+  const solvingRef = useRef(false);
+
   function updateCell(row: number, col: number, value: number | null) {
     setSudoku((currentSudoku) => {
       const newSudoku = currentSudoku.getCopy();
@@ -33,6 +42,41 @@ export default function SudokuGame({
   function handleNumberInput(value: number | null) {
     if (!selected) return;
     updateCell(selected.row, selected.col, value);
+  }
+
+  async function handleSolve() {
+    if (solvingRef.current) return;
+    solvingRef.current = true;
+
+    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solvedGrid, steps] = solutions[0];
+
+    // 1. Reset to initial values only
+    setSudoku(new SudokuGrid(initialValues));
+    setHighlighted(Array.from({ length: 9 }, () => Array(9).fill(false)));
+
+    // 2. Play steps
+    for (const step of steps) {
+      await new Promise((res) => setTimeout(res, speed));
+
+      setSudoku((current) => {
+        const next = current.getCopy();
+        const cell = next.findCellByPosition(step.position);
+        if (cell && !cell.hasInitialValue()) {
+          cell.setValue(step.value);
+        }
+        return next as SudokuGrid;
+      });
+
+      setHighlighted((prev) => {
+        const next = prev.map((r) => [...r]);
+        const [r, c] = step.position;
+        next[r][c] = true;
+        return next;
+      });
+    }
+
+    solvingRef.current = false;
   }
 
   const [isInvalid, invalidCells] = sudoku.isInvalid();
@@ -69,6 +113,7 @@ export default function SudokuGame({
                             selected?.row === row && selected?.col === col
                           }
                           isInvalid={isInvalid && invalidCells[row][col]}
+                          isHighlighted={highlighted[row][col]}
                           onSelect={setSelected}
                           onChange={updateCell}
                         />
@@ -82,7 +127,14 @@ export default function SudokuGame({
         ))}
       </div>
 
-      <SudokuNumpad disabled={!selected} onInput={handleNumberInput} />
+      {/* NUMPAD */}
+      <SudokuNumpad
+        onInput={handleNumberInput}
+        onSolve={handleSolve}
+        disabled={!selected}
+        speed={speed}
+        setSpeed={setSpeed}
+      />
     </div>
   );
 }
