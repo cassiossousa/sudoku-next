@@ -25,7 +25,7 @@ export default function SudokuNumpad({
           <button
             key={n}
             onClick={() => onInput(n)}
-            className="h-12 w-12 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-lg font-semibold"
+            className="h-10 w-10 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-lg font-semibold"
           >
             {n}
           </button>
@@ -33,7 +33,7 @@ export default function SudokuNumpad({
 
         <button
           onClick={() => onInput(null)}
-          className="col-span-9 md:col-span-3 h-12 bg-red-500/20 hover:bg-red-500/30 rounded text-sm"
+          className="h-10 col-span-9 md:col-span-3 bg-red-500/20 hover:bg-red-500/30 rounded text-sm"
         >
           Clear
         </button>
@@ -42,7 +42,7 @@ export default function SudokuNumpad({
       {/* Solve button (always active) */}
       <button
         onClick={onSolve}
-        className="h-12 bg-yellow-500/20 hover:bg-yellow-500/30 rounded text-sm font-semibold"
+        className="h-10 bg-yellow-500/20 hover:bg-yellow-500/30 rounded text-sm font-semibold"
       >
         Solve
       </button>
