@@ -1,3 +1,4 @@
+import Footer from './components/footer';
 import SudokuGame from './components/sudoku-game';
 
 export default function Home() {
@@ -14,11 +15,15 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-6">
+    <main className="min-h-screen flex flex-col items-center justify-between">
+      {/* CONTENT */}
+      <div className="flex flex-col items-center gap-6 px-4 py-6">
         <h1 className="text-3xl font-semibold tracking-tight">Sudoku</h1>
         <SudokuGame initialValues={initialValues} />
       </div>
+
+      {/* FOOTER */}
+      <Footer />
     </main>
   );
 }
