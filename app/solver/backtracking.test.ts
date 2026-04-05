@@ -1,8 +1,8 @@
 import { SudokuGrid } from '../sudoku/sudoku';
-import { solveByBacktracking } from './backtracking';
+import { MAX_PARALLEL_BRANCHES, solveByBacktracking } from './backtracking';
 
 describe('solveByBacktracking()', () => {
-  it('returns the Sudoku grid itself if the game is already solved', () => {
+  it('returns the Sudoku grid itself if the game is already solved', async () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [6, 9, 2, 4, 1, 5, 3, 7, 8],
       [8, 1, 5, 7, 6, 3, 4, 2, 9],
@@ -15,16 +15,20 @@ describe('solveByBacktracking()', () => {
       [2, 8, 7, 5, 4, 9, 6, 1, 3],
     ]);
 
-    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] =
+      await solveByBacktracking(sudoku);
+
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(0);
     expect(solvedGame).toEqual(sudoku);
+    expect(counters.branchesReceived).toBe(0);
+    expect(counters.maxConcurrency).toBe(0);
   });
 
-  it('short-circuits easy Sudoku games that can be solved via single-guess cells only', () => {
+  it('short-circuits easy Sudoku games that can be solved via single-guess cells only', async () => {
     const sudoku = new SudokuGrid([
       [6, 0, 2, 4, 1, 0, 0, 0, 8],
       [0, 1, 5, 7, 0, 3, 0, 0, 9],
@@ -37,7 +41,9 @@ describe('solveByBacktracking()', () => {
       [0, 8, 7, 0, 0, 0, 6, 0, 3],
     ]);
 
-    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] =
+      await solveByBacktracking(sudoku);
+
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
 
@@ -61,9 +67,12 @@ describe('solveByBacktracking()', () => {
         '|287|549|613|\n' +
         '-------------',
     );
+
+    expect(counters.branchesReceived).toBe(0);
+    expect(counters.maxConcurrency).toBe(0);
   });
 
-  it('returns a single solution by backtracking harder Sudoku games', () => {
+  it('returns a single solution by backtracking harder Sudoku games', async () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [0, 4, 0, 8, 0, 0, 2, 0, 0],
       [5, 3, 0, 0, 0, 0, 0, 0, 4],
@@ -76,7 +85,9 @@ describe('solveByBacktracking()', () => {
       [0, 6, 0, 0, 0, 5, 3, 0, 0],
     ]);
 
-    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] =
+      await solveByBacktracking(sudoku);
+
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(1);
 
@@ -103,9 +114,13 @@ describe('solveByBacktracking()', () => {
         '|962|415|378|\n' +
         '-------------',
     );
+
+    expect(counters.branchesReceived).toBe(40);
+    expect(counters.maxConcurrency).toBeGreaterThan(0);
+    expect(counters.maxConcurrency).toBeLessThanOrEqual(MAX_PARALLEL_BRANCHES);
   });
 
-  it('returns multiple solutions by backtracking quasi-Sudoku games', () => {
+  it('returns multiple solutions by backtracking quasi-Sudoku games', async () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [2, 9, 5, 7, 4, 3, 8, 6, 1],
       [4, 3, 1, 8, 6, 5, 9, 0, 0],
@@ -118,21 +133,13 @@ describe('solveByBacktracking()', () => {
       [1, 5, 4, 9, 3, 8, 6, 0, 0],
     ]);
 
-    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] =
+      await solveByBacktracking(sudoku);
+
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(2);
 
-    const [firstGame, firstGameSteps] = solutions[0];
-    expect(firstGameSteps.length).toBe(4);
-    expect(
-      firstGameSteps.filter((step) => step.solverType === 'single-guess')
-        .length,
-    ).toBe(3);
-    expect(
-      firstGameSteps.filter((step) => step.solverType === 'backtracking')
-        .length,
-    ).toBe(1);
-    expect(firstGame.print()).toBe(
+    const expectedSolutions = [
       '-------------\n' +
         '|295|743|861|\n' +
         '|431|865|972|\n' +
@@ -146,19 +153,6 @@ describe('solveByBacktracking()', () => {
         '|928|671|354|\n' +
         '|154|938|627|\n' +
         '-------------',
-    );
-
-    const [secondGame, secondGameSteps] = solutions[1];
-    expect(secondGameSteps.length).toBe(4);
-    expect(
-      secondGameSteps.filter((step) => step.solverType === 'single-guess')
-        .length,
-    ).toBe(3);
-    expect(
-      secondGameSteps.filter((step) => step.solverType === 'backtracking')
-        .length,
-    ).toBe(1);
-    expect(secondGame.print()).toBe(
       '-------------\n' +
         '|295|743|861|\n' +
         '|431|865|927|\n' +
@@ -172,6 +166,48 @@ describe('solveByBacktracking()', () => {
         '|928|671|354|\n' +
         '|154|938|672|\n' +
         '-------------',
+    ];
+
+    const solutionPrints = solutions.map(([game]) => game.print());
+    expect(solutionPrints).toEqual(expect.arrayContaining(expectedSolutions));
+    expect(solutionPrints.length).toBe(2);
+
+    for (const [, steps] of solutions) {
+      expect(steps.length).toBe(4);
+      expect(
+        steps.filter((step) => step.solverType === 'single-guess').length,
+      ).toBe(3);
+      expect(
+        steps.filter((step) => step.solverType === 'backtracking').length,
+      ).toBe(1);
+    }
+
+    expect(counters.branchesReceived).toBe(2);
+    expect(counters.maxConcurrency).toBeLessThanOrEqual(MAX_PARALLEL_BRANCHES);
+  });
+
+  it('honors a maxParallelBranches limit and still resolves', async () => {
+    const sudoku: SudokuGrid = new SudokuGrid([
+      [0, 4, 0, 8, 0, 0, 2, 0, 0],
+      [5, 3, 0, 0, 0, 0, 0, 0, 4],
+      [8, 0, 0, 5, 0, 9, 0, 1, 0],
+      [2, 0, 0, 0, 0, 0, 0, 4, 5],
+      [4, 9, 0, 0, 0, 0, 8, 3, 0],
+      [0, 0, 0, 0, 0, 0, 1, 0, 6],
+      [3, 0, 0, 0, 2, 0, 5, 0, 0],
+      [1, 0, 0, 0, 6, 0, 0, 2, 0],
+      [0, 6, 0, 0, 0, 5, 3, 0, 0],
+    ]);
+
+    const maxParallelBranches = 2 * MAX_PARALLEL_BRANCHES;
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(
+      sudoku,
+      maxParallelBranches,
     );
+
+    expect(backtrackingNeeded).toBe(true);
+    expect(solutions.length).toBe(1);
+    expect(counters.branchesReceived).toBe(40);
+    expect(counters.maxConcurrency).toBeLessThanOrEqual(maxParallelBranches);
   });
 });

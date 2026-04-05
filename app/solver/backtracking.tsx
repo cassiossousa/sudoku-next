@@ -1,6 +1,9 @@
 import { IGrid, IGridCell } from '../sudoku/sudoku';
 import { fillSingleGuesses } from './single-guess';
 import { SolverStep } from './step';
+import { createSemaphore } from './semaphore';
+
+export const MAX_PARALLEL_BRANCHES = 20;
 
 /**
  * Let's imagine how a basic backtracking algorithm would work:
@@ -33,26 +36,39 @@ import { SolverStep } from './step';
  * solutions) could easily take hours or over millions of years to be fully solved.
  *
  * A grid with exactly 17 digits and one solution takes a few minutes to be solved.
+ *
+ * When a bifurcation occurs, each guess branch becomes an async task.
+ * The maxParallelBranches limit controls how many of those branches may run
+ * concurrently so the solving process can be tuned for heavier servers.
  */
-export function solveByBacktracking(
+export async function solveByBacktracking(
   grid: IGrid,
-): [[IGrid, SolverStep[]][], boolean] {
+  maxParallelBranches: number = MAX_PARALLEL_BRANCHES,
+): Promise<
+  [
+    [IGrid, SolverStep[]][],
+    boolean,
+    { branchesReceived: number; maxConcurrency: number },
+  ]
+> {
   const emptyGrid = grid.getEmptyCopy();
-  const solutions: [IGrid, SolverStep[]][] = [];
-  const bifurcationsInCourse: [IGrid, SolverStep[]][] = [];
   let backtrackingNeeded = false;
+  const semaphore =
+    createSemaphore<[IGrid, SolverStep[]][]>(maxParallelBranches);
 
-  const _recursiveBacktracking = (
+  // The current recursive call may spawn multiple branch tasks.
+  // Each branch must acquire a semaphore slot before recursing so that
+  // the total number of active parallel branches never exceeds the limit.
+  const _recursiveBacktracking = async (
     currentGrid: IGrid,
     currentSteps: SolverStep[],
-  ): void => {
+  ): Promise<[IGrid, SolverStep[]][]> => {
     // OPTIMIZATION: fill all single guesses in-place,
     // and if this is enough to solve the grid, return it.
     const [fullySolved, singleGuessSteps] = fillSingleGuesses(currentGrid);
 
     if (fullySolved) {
-      solutions.push([currentGrid, [...currentSteps, ...singleGuessSteps]]);
-      return;
+      return [[currentGrid, [...currentSteps, ...singleGuessSteps]]];
     }
 
     // Code needs to get to this very point
@@ -66,30 +82,27 @@ export function solveByBacktracking(
 
     // EXIT CONDITION [INVALID] - cell cannot be filled at all.
     if (availableGuesses.size === 0) {
-      return;
+      return [];
     }
 
     const firstCellPosition: number[] =
       currentGrid.findCellPosition(firstCell)!;
 
+    const guessValues: number[] = Array.from(availableGuesses);
+    const baseGrid: IGrid = currentGrid.getCopy();
+    let firstBranchPromise: Promise<[IGrid, SolverStep[]][]> | null = null;
+    const queuedBranchPromises: Promise<[IGrid, SolverStep[]][]>[] = [];
+
     // In order to get here, you need to have at least 2 guesses
     // for the cell (as single guesses are filled first, and
     // zero guesses are invalid/undesirable states), so
     // we will always reach a bifurcation.
-    availableGuesses.forEach((value: number, idx: number): void => {
+    guessValues.forEach((value: number, idx: number): void => {
       // Each bifurcation requires its own copy of the current grid
       // to avoid memory concurrency by different guesses. The first
-      // grid may keep its reference throughtout the recursion.
-      let gridToIterate: IGrid;
+      // grid may keep its reference throughout the recursion.
+      const gridToIterate: IGrid = idx === 0 ? currentGrid : baseGrid.getCopy();
 
-      if (idx === 0) {
-        gridToIterate = currentGrid;
-      } else {
-        gridToIterate = currentGrid.getCopy();
-      }
-
-      // We're getting a cell based on the original grid's
-      // cell position, so we know it's not null.
       const firstCellToIterate: IGridCell =
         gridToIterate.findCellByPosition(firstCellPosition)!;
 
@@ -107,21 +120,35 @@ export function solveByBacktracking(
         backtrackingStep,
       ];
 
+      const branchPromise = semaphore(() =>
+        _recursiveBacktracking(gridToIterate, steps),
+      );
+
       if (idx === 0) {
-        _recursiveBacktracking(gridToIterate, steps);
+        firstBranchPromise = branchPromise;
       } else {
-        bifurcationsInCourse.push([gridToIterate, steps]);
+        queuedBranchPromises.push(branchPromise);
       }
     });
+
+    // The first branch is the one that originated the other branches,
+    // so we keep its execution towards completion.
+    const firstBranchSolutions = await firstBranchPromise!;
+    const queuedBranchSolutions = await Promise.all(
+      queuedBranchPromises.reverse(),
+    );
+
+    return [firstBranchSolutions, ...queuedBranchSolutions].flat();
   };
 
-  // RECURSION CALL
-  _recursiveBacktracking(emptyGrid, []);
+  const solutions = await _recursiveBacktracking(emptyGrid, []);
 
-  while (bifurcationsInCourse.length > 0) {
-    const [grid, steps]: [IGrid, SolverStep[]] = bifurcationsInCourse.pop()!;
-    _recursiveBacktracking(grid, steps);
-  }
-
-  return [solutions, backtrackingNeeded];
+  return [
+    solutions,
+    backtrackingNeeded,
+    {
+      branchesReceived: semaphore.totalReceived,
+      maxConcurrency: semaphore.maxConcurrency,
+    },
+  ];
 }

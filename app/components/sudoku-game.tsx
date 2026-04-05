@@ -55,7 +55,7 @@ export default function SudokuGame({
     if (solvingRef.current) return;
     solvingRef.current = true;
 
-    const [solutions, backtrackingNeeded] = solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded] = await solveByBacktracking(sudoku);
     const [solvedGrid, steps] = solutions[0];
 
     // 1. Reset first
