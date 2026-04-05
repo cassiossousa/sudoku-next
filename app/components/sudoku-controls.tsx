@@ -7,6 +7,7 @@ export default function SudokuControls({
   disabled,
   speed,
   setSpeed,
+  counters,
 }: {
   onInput: (value: number | null) => void;
   onSolve: () => void;
@@ -14,6 +15,10 @@ export default function SudokuControls({
   disabled: boolean;
   speed: number;
   setSpeed: (v: number) => void;
+  counters: {
+    branchesReceived: number | null;
+    maxConcurrency: number | null;
+  };
 }) {
   return (
     <div className="flex flex-col gap-2 w-full max-w-md">
@@ -72,6 +77,15 @@ export default function SudokuControls({
           className="w-full"
         />
       </div>
+
+      {/* COUNTERS */}
+      {counters.branchesReceived !== null &&
+        counters.maxConcurrency !== null && (
+          <div className="flex flex-col gap-2 text-xs">
+            <label>Branches received: {counters.branchesReceived}</label>
+            <label>Max concurrency: {counters.maxConcurrency}</label>
+          </div>
+        )}
     </div>
   );
 }

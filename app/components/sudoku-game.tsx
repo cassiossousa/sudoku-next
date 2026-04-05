@@ -24,7 +24,15 @@ export default function SudokuGame({
     Array.from({ length: 9 }, () => Array(9).fill(false)),
   );
 
-  const [speed, setSpeed] = useState(500); // ms
+  const [speed, setSpeed] = useState(50); // ms
+
+  const [counters, setCounters] = useState<{
+    branchesReceived: number | null;
+    maxConcurrency: number | null;
+  }>({
+    branchesReceived: null,
+    maxConcurrency: null,
+  });
 
   const solvingRef = useRef(false);
 
@@ -49,13 +57,19 @@ export default function SudokuGame({
     setSudoku(new SudokuGrid(initialValues));
     setHighlighted(Array.from({ length: 9 }, () => Array(9).fill(false)));
     setSelected(null);
+    setCounters({
+      branchesReceived: null,
+      maxConcurrency: null,
+    });
   }
 
   async function handleSolve() {
     if (solvingRef.current) return;
     solvingRef.current = true;
 
-    const [solutions, backtrackingNeeded] = await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] =
+      await solveByBacktracking(sudoku);
+
     const [solvedGrid, steps] = solutions[0];
 
     // 1. Reset first
@@ -81,6 +95,12 @@ export default function SudokuGame({
         return next;
       });
     }
+
+    // 3. Set counters
+    setCounters({
+      branchesReceived: counters.branchesReceived,
+      maxConcurrency: counters.maxConcurrency,
+    });
 
     solvingRef.current = false;
   }
@@ -141,6 +161,7 @@ export default function SudokuGame({
         disabled={!selected}
         speed={speed}
         setSpeed={setSpeed}
+        counters={counters}
       />
     </div>
   );
