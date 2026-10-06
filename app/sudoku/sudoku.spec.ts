@@ -19,25 +19,19 @@ describe('SudokuGrid', () => {
 
   describe('getAvailableGuessesInRow()', () => {
     it('returns the proper guesses in the row', () => {
-      expect(sudoku.getAvailableGuessesInRow(4)).toEqual(
-        new Set([1, 2, 3, 4, 6, 7]),
-      );
+      expect(sudoku.getAvailableGuessesInRow(4)).toEqual(new Set([1, 2, 3, 4, 6, 7]));
     });
   });
 
   describe('getAvailableGuessesInCol()', () => {
     it('returns the proper guesses in the column', () => {
-      expect(sudoku.getAvailableGuessesInCol(1)).toEqual(
-        new Set([2, 4, 6, 7, 9]),
-      );
+      expect(sudoku.getAvailableGuessesInCol(1)).toEqual(new Set([2, 4, 6, 7, 9]));
     });
   });
 
   describe('getAvailableGuessesInBox()', () => {
     it('returns the proper guesses in the 3x3 box containing the position', () => {
-      expect(sudoku.getAvailableGuessesInBox(4, 1)).toEqual(
-        new Set([1, 2, 4, 7, 9]),
-      );
+      expect(sudoku.getAvailableGuessesInBox(4, 1)).toEqual(new Set([1, 2, 4, 7, 9]));
     });
   });
 

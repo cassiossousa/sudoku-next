@@ -15,8 +15,7 @@ describe('solveByBacktracking()', () => {
       [2, 8, 7, 5, 4, 9, 6, 1, 3],
     ]);
 
-    const [solutions, backtrackingNeeded, counters] =
-      await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
@@ -41,17 +40,14 @@ describe('solveByBacktracking()', () => {
       [0, 8, 7, 0, 0, 0, 6, 0, 3],
     ]);
 
-    const [solutions, backtrackingNeeded, counters] =
-      await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
     expect(backtrackingNeeded).toBe(false);
     expect(solutions.length).toBe(1);
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(43);
-    expect(
-      steps.filter((step) => step.solverType === 'single-guess').length,
-    ).toBe(43);
+    expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(43);
     expect(solvedGame.print()).toBe(
       '-------------\n' +
         '|692|415|378|\n' +
@@ -85,20 +81,15 @@ describe('solveByBacktracking()', () => {
       [0, 6, 0, 0, 0, 5, 3, 0, 0],
     ]);
 
-    const [solutions, backtrackingNeeded, counters] =
-      await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(1);
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(53);
-    expect(
-      steps.filter((step) => step.solverType === 'single-guess').length,
-    ).toBe(46);
-    expect(
-      steps.filter((step) => step.solverType === 'backtracking').length,
-    ).toBe(7);
+    expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(46);
+    expect(steps.filter((step) => step.solverType === 'backtracking').length).toBe(7);
     expect(solvedGame.print()).toBe(
       '-------------\n' +
         '|649|831|257|\n' +
@@ -133,8 +124,7 @@ describe('solveByBacktracking()', () => {
       [1, 5, 4, 9, 3, 8, 6, 0, 0],
     ]);
 
-    const [solutions, backtrackingNeeded, counters] =
-      await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
     expect(backtrackingNeeded).toBe(true);
     expect(solutions.length).toBe(2);
@@ -174,12 +164,8 @@ describe('solveByBacktracking()', () => {
 
     for (const [, steps] of solutions) {
       expect(steps.length).toBe(4);
-      expect(
-        steps.filter((step) => step.solverType === 'single-guess').length,
-      ).toBe(3);
-      expect(
-        steps.filter((step) => step.solverType === 'backtracking').length,
-      ).toBe(1);
+      expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(3);
+      expect(steps.filter((step) => step.solverType === 'backtracking').length).toBe(1);
     }
 
     expect(counters.branchesReceived).toBe(2);

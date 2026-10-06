@@ -45,16 +45,11 @@ export async function solveByBacktracking(
   grid: IGrid,
   maxParallelBranches: number = MAX_PARALLEL_BRANCHES,
 ): Promise<
-  [
-    [IGrid, SolverStep[]][],
-    boolean,
-    { branchesReceived: number; maxConcurrency: number },
-  ]
+  [[IGrid, SolverStep[]][], boolean, { branchesReceived: number; maxConcurrency: number }]
 > {
   const emptyGrid = grid.getEmptyCopy();
   let backtrackingNeeded = false;
-  const semaphore =
-    createSemaphore<[IGrid, SolverStep[]][]>(maxParallelBranches);
+  const semaphore = createSemaphore<[IGrid, SolverStep[]][]>(maxParallelBranches);
 
   // The current recursive call may spawn multiple branch tasks.
   // Each branch must acquire a semaphore slot before recursing so that
@@ -77,16 +72,14 @@ export async function solveByBacktracking(
 
     // After the first optimization, this next cell cannot be null.
     const firstCell = currentGrid.getFirstEmptyCell()!;
-    const availableGuesses: Set<number> =
-      currentGrid.getAvailableGuesses(firstCell);
+    const availableGuesses: Set<number> = currentGrid.getAvailableGuesses(firstCell);
 
     // EXIT CONDITION [INVALID] - cell cannot be filled at all.
     if (availableGuesses.size === 0) {
       return [];
     }
 
-    const firstCellPosition: number[] =
-      currentGrid.findCellPosition(firstCell)!;
+    const firstCellPosition: number[] = currentGrid.findCellPosition(firstCell)!;
 
     const guessValues: number[] = Array.from(availableGuesses);
     const baseGrid: IGrid = currentGrid.getCopy();
@@ -103,8 +96,7 @@ export async function solveByBacktracking(
       // grid may keep its reference throughout the recursion.
       const gridToIterate: IGrid = idx === 0 ? currentGrid : baseGrid.getCopy();
 
-      const firstCellToIterate: IGridCell =
-        gridToIterate.findCellByPosition(firstCellPosition)!;
+      const firstCellToIterate: IGridCell = gridToIterate.findCellByPosition(firstCellPosition)!;
 
       firstCellToIterate.setValue(value);
 
@@ -114,15 +106,9 @@ export async function solveByBacktracking(
         value,
       };
 
-      const steps: SolverStep[] = [
-        ...currentSteps,
-        ...singleGuessSteps,
-        backtrackingStep,
-      ];
+      const steps: SolverStep[] = [...currentSteps, ...singleGuessSteps, backtrackingStep];
 
-      const branchPromise = semaphore(() =>
-        _recursiveBacktracking(gridToIterate, steps),
-      );
+      const branchPromise = semaphore(() => _recursiveBacktracking(gridToIterate, steps));
 
       if (idx === 0) {
         firstBranchPromise = branchPromise;
@@ -134,9 +120,7 @@ export async function solveByBacktracking(
     // The first branch is the one that originated the other branches,
     // so we keep its execution towards completion.
     const firstBranchSolutions = await firstBranchPromise!;
-    const queuedBranchSolutions = await Promise.all(
-      queuedBranchPromises.reverse(),
-    );
+    const queuedBranchSolutions = await Promise.all(queuedBranchPromises.reverse());
 
     return [firstBranchSolutions, ...queuedBranchSolutions].flat();
   };

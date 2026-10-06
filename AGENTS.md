@@ -67,6 +67,10 @@
 - Preserve the current object and function naming style used by the app.
 - Do not add package dependencies unless the task truly requires them.
 - Prefer deterministic behavior for puzzles and page state.
+- **File size limits enforced by ESLint**:
+  - Non-test files: maximum 200 lines (excluding comments and blank lines)
+  - Test files: maximum 400 lines (excluding comments and blank lines)
+  - If a file exceeds these limits, refactor by extracting functions, components, or modules to keep code maintainable and focused.
 
 ## Decision Principles
 - If a user asks for a random game, make that randomness happen only after a user-triggered action or a client-only state update.
@@ -80,6 +84,53 @@
 - When architectural changes occur (e.g., adding new layers, refactoring file structure), update the README's architecture overview.
 - Ensure README accurately reflects the current tech stack, patterns in use, and project status.
 - Update installation/usage instructions if new dependencies or workflows are added.
+
+## Regression Prevention
+- **Always run tests before committing** changes, even for small fixes. Use `npm test` (which now includes `--runInBand` by default) to catch breaking changes early.
+- **When modifying core logic** (solver, generator, validation), verify that existing puzzles still solve correctly and generate valid unique solutions.
+- **When changing UI components**, ensure that existing game flows (select difficulty → start game → make moves → win) still work without hydration errors or state inconsistencies.
+- **Check for SSR hydration issues** after any changes that involve `useEffect`, random values, or browser-only APIs. Verify the app loads correctly in both development and production builds.
+- **Test edge cases**: empty grid, all zeros, already-solved grid, invalid grid, rapid state changes, keyboard navigation, touch interactions.
+- **Verify localStorage persistence** after state management changes: ensure games save/restore correctly across page refreshes.
+- **When refactoring file structure**, ensure all imports are updated and no circular dependencies are introduced.
+- **When adding new dependencies**, verify they don't break existing functionality or introduce hydration/SSR issues.
+- **Run the full test suite** after any significant changes, not just the specific test file for the feature being modified.
+- **If a regression is detected**, immediately identify the root cause, add a test that reproduces the issue, fix it, and then commit with the test covering the regression case.
+
+### Automated Regression Protection
+The project includes several automated safeguards against regressions:
+
+1. **Pre-commit hooks** (Husky + lint-staged)
+   - Automatically runs ESLint and Prettier on staged files before allowing commits
+   - Ensures code style consistency and catches basic errors before they reach the repository
+   - Configured to run on TypeScript/JavaScript files and config files
+
+2. **Test execution configuration**
+   - `npm test` now runs with `--runInBand` by default for consistent, sequential test execution
+   - `npm run test:ci` runs with `--runInBand --ci --coverage --maxWorkers=2` for CI environments
+   - Jest config removed hardcoded `maxWorkers: 1` to allow CLI control
+
+3. **CI pipeline enhancements**
+   - Added Prettier check (`npm run prettier:check`) to CI workflow
+   - Tests run with coverage collection in CI
+   - Optional Codecov integration for coverage tracking (requires `CODECOV_TOKEN` secret)
+   - All checks must pass before PRs can be merged
+
+4. **Code quality tools**
+   - ESLint for linting TypeScript/JavaScript with custom rules:
+     - Non-test files limited to 200 lines (excluding comments/blank lines)
+     - Test files limited to 400 lines (excluding comments/blank lines)
+     - Encourages refactoring into smaller, focused modules
+   - Prettier for consistent code formatting
+   - TypeScript compiler check (`npm run tsc`) for type safety
+   - Knip for detecting unused exports and dependencies
+
+These automated checks ensure that:
+- Code style is consistent across the project
+- Type errors are caught before commit
+- Tests pass before code is merged
+- Coverage is tracked over time
+- CI enforces the same standards as local development
 
 ## Architecture Patterns (from 20+ Industry Sources)
 

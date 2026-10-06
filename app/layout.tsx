@@ -12,11 +12,7 @@ export const metadata: Metadata = {
   description: 'Sudoku game written on Next.js',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} font-sans`}>{children}</body>

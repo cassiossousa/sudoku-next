@@ -79,13 +79,12 @@ export default function SudokuControls({
       </div>
 
       {/* COUNTERS */}
-      {counters.branchesReceived !== null &&
-        counters.maxConcurrency !== null && (
-          <div className="flex flex-col gap-2 text-xs">
-            <label>Branches received: {counters.branchesReceived}</label>
-            <label>Max concurrency: {counters.maxConcurrency}</label>
-          </div>
-        )}
+      {counters.branchesReceived !== null && counters.maxConcurrency !== null && (
+        <div className="flex flex-col gap-2 text-xs">
+          <label>Branches received: {counters.branchesReceived}</label>
+          <label>Max concurrency: {counters.maxConcurrency}</label>
+        </div>
+      )}
     </div>
   );
 }

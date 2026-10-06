@@ -6,14 +6,8 @@ import SudokuCell from './sudoku-game-cell';
 import SudokuControls from './sudoku-controls';
 import { solveByBacktracking } from '../solver/backtracking';
 
-export default function SudokuGame({
-  initialValues,
-}: {
-  initialValues: number[][];
-}) {
-  const [sudoku, setSudoku] = useState<SudokuGrid>(
-    () => new SudokuGrid(initialValues),
-  );
+export default function SudokuGame({ initialValues }: { initialValues: number[][] }) {
+  const [sudoku, setSudoku] = useState<SudokuGrid>(() => new SudokuGrid(initialValues));
 
   const [selected, setSelected] = useState<{
     row: number;
@@ -67,8 +61,7 @@ export default function SudokuGame({
     if (solvingRef.current) return;
     solvingRef.current = true;
 
-    const [solutions, backtrackingNeeded, counters] =
-      await solveByBacktracking(sudoku);
+    const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
     const [solvedGrid, steps] = solutions[0];
 
@@ -135,9 +128,7 @@ export default function SudokuGame({
                           row={row}
                           col={col}
                           isInitial={isInitial}
-                          isSelected={
-                            selected?.row === row && selected?.col === col
-                          }
+                          isSelected={selected?.row === row && selected?.col === col}
                           isInvalid={isInvalid && invalidCells[row][col]}
                           isHighlighted={highlighted[row][col]}
                           onSelect={setSelected}

@@ -16,9 +16,7 @@ export function getRandomGameByDifficulty(difficulty: Game['difficulty']) {
 }
 
 export default function Home() {
-  const [selectedDifficulty, setSelectedDifficulty] = useState<
-    Game['difficulty'] | null
-  >(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Game['difficulty'] | null>(null);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
 
   function handleStartNewGame() {
@@ -58,9 +56,7 @@ export default function Home() {
         </button>
 
         {!activeGame ? (
-          <p className="text-sm text-zinc-400">
-            Pick a difficulty, then start a new Sudoku.
-          </p>
+          <p className="text-sm text-zinc-400">Pick a difficulty, then start a new Sudoku.</p>
         ) : (
           <SudokuGame
             key={`${selectedDifficulty}-${activeGame.grid.flat().join('-')}`}

@@ -19,6 +19,15 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run prettier:check
       - run: npm run tsc
-      - run: npm run test
+      - run: npm run test:ci
       - run: npm run build
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false

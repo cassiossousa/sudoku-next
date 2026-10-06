@@ -9,7 +9,7 @@ const config = {
   },
   testMatch: ['**/*.(test|spec).(ts|tsx)'],
   collectCoverageFrom: ['**/*.(ts|tsx)', '!**/*.d.ts', '!**/node_modules/**'],
-  maxWorkers: 1,
+  // maxWorkers is controlled via CLI flags in scripts (runInBand for local, maxWorkers=2 for CI)
 };
 
 export default config;

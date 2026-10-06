@@ -40,17 +40,13 @@ export default function SudokuCell({
     ? 'bg-zinc-800 text-blue-400 border-zinc-700'
     : 'border-zinc-700 hover:bg-zinc-800 focus:bg-zinc-700';
 
-  const invalidStyles = isInvalid
-    ? 'border-red-400 bg-red-500/10 text-red-300'
-    : '';
+  const invalidStyles = isInvalid ? 'border-red-400 bg-red-500/10 text-red-300' : '';
 
   const selectedStyles = isSelected
     ? 'ring-2 ring-blue-400 outline outline-2 outline-blue-400 outline-offset-[-2px] relative z-10'
     : '';
 
-  const highlightedStyles = isHighlighted
-    ? 'bg-yellow-400/30 border-yellow-400'
-    : '';
+  const highlightedStyles = isHighlighted ? 'bg-yellow-400/30 border-yellow-400' : '';
 
   return (
     <button

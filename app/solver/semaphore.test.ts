@@ -64,9 +64,7 @@ describe('createSemaphore()', () => {
 
   it('allows unlimited concurrency when maxParallelTasks is high', async () => {
     const semaphore = createSemaphore<number>(10);
-    const tasks = Array.from({ length: 5 }, (_, idx) =>
-      semaphore(async () => idx),
-    );
+    const tasks = Array.from({ length: 5 }, (_, idx) => semaphore(async () => idx));
 
     const results = await Promise.all(tasks);
     expect(results.sort()).toEqual([0, 1, 2, 3, 4]);
