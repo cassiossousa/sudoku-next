@@ -1,6 +1,9 @@
 import { type IGrid } from '../../grid';
 import { fillNakedSingles } from './naked-singles';
 import { XWing } from './techniques/x-wing';
+import { HiddenSingles } from './techniques/hidden-singles';
+import { NakedPairs } from './techniques/naked-pairs';
+import { PointingPairs } from './techniques/pointing-pairs';
 import { type TechniqueResult } from './technique';
 
 /**
@@ -57,21 +60,60 @@ export class SequentialSolver {
         break;
       }
 
-      // Technique 2: X-Wing (eliminates candidates, no cell filling)
+      // Technique 2: Hidden Singles (digits that can only go in one place)
+      const hiddenSinglesResult = HiddenSingles.find(gridCopy);
+      if (hiddenSinglesResult.applied) {
+        techniquesUsed.push('hidden-single');
+        steps.push({
+          solverType: 'sequential',
+          position: [0, 0], // Placeholder
+          value: 0, // Placeholder
+          highlightedCells: hiddenSinglesResult.highlightedCells,
+          explanation: hiddenSinglesResult.explanation,
+        });
+        progress = true;
+      }
+
+      // Technique 3: Naked Pairs (two cells sharing two candidates)
+      const nakedPairsResult = NakedPairs.find(gridCopy);
+      if (nakedPairsResult.applied) {
+        techniquesUsed.push('naked-pair');
+        steps.push({
+          solverType: 'sequential',
+          position: [0, 0], // Placeholder
+          value: 0, // Placeholder
+          highlightedCells: nakedPairsResult.highlightedCells,
+          explanation: nakedPairsResult.explanation,
+        });
+        progress = true;
+      }
+
+      // Technique 4: Pointing Pairs (candidate constrained in a box)
+      const pointingPairsResult = PointingPairs.find(gridCopy);
+      if (pointingPairsResult.applied) {
+        techniquesUsed.push('pointing-pair');
+        steps.push({
+          solverType: 'sequential',
+          position: [0, 0], // Placeholder
+          value: 0, // Placeholder
+          highlightedCells: pointingPairsResult.highlightedCells,
+          explanation: pointingPairsResult.explanation,
+        });
+        progress = true;
+      }
+
+      // Technique 5: X-Wing (pattern across two rows/columns)
       const xWingResult = XWing.find(gridCopy);
       if (xWingResult.applied) {
         techniquesUsed.push('x-wing');
-        // Create a step to show the X-Wing pattern
         steps.push({
-          solverType: 'x-wing',
-          position: [0, 0], // Placeholder position
-          value: 0, // Placeholder value
+          solverType: 'sequential',
+          position: [0, 0], // Placeholder
+          value: 0, // Placeholder
           highlightedCells: xWingResult.highlightedCells,
           explanation: xWingResult.explanation,
         });
         progress = true;
-        // Note: X-Wing doesn't fill cells, only eliminates candidates
-        // We'd need to track candidate elimination separately
       }
 
       // If no technique made progress, we're stuck

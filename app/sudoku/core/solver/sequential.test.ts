@@ -33,6 +33,8 @@ describe('SequentialSolver', () => {
 
     expect(Array.isArray(result.techniquesUsed)).toBe(true);
     expect(result.techniquesUsed.length).toBeGreaterThan(0);
+    // Should include at least naked-single
+    expect(result.techniquesUsed).toContain('naked-single');
   });
 
   it('returns steps taken during solving', () => {
