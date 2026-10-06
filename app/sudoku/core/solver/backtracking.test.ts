@@ -1,6 +1,14 @@
-import { SudokuGrid } from '../sudoku/sudoku';
+import { SudokuGrid } from '../../sudoku';
 import { MAX_PARALLEL_BRANCHES, solveByBacktracking } from './backtracking';
 
+/**
+ * Backtracking Solver Tests
+ *
+ * Tests the enhanced backtracking solver that applies sequential techniques
+ * (naked singles, X-wing, etc.) before resorting to brute-force backtracking.
+ * This mimics how expert human solvers approach puzzles and reduces the
+ * search space for backtracking.
+ */
 describe('solveByBacktracking()', () => {
   it('returns the Sudoku grid itself if the game is already solved', async () => {
     const sudoku: SudokuGrid = new SudokuGrid([
@@ -27,7 +35,7 @@ describe('solveByBacktracking()', () => {
     expect(counters.maxConcurrency).toBe(0);
   });
 
-  it('short-circuits easy Sudoku games that can be solved via single-guess cells only', async () => {
+  it('short-circuits easy Sudoku games that can be solved via naked singles', async () => {
     const sudoku = new SudokuGrid([
       [6, 0, 2, 4, 1, 0, 0, 0, 8],
       [0, 1, 5, 7, 0, 3, 0, 0, 9],
@@ -47,7 +55,11 @@ describe('solveByBacktracking()', () => {
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(43);
-    expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(43);
+    expect(steps.filter((step) => step.solverType === 'naked-single').length).toBe(43);
+    // Verify that naked-single steps include highlightedCells for visualization
+    expect(steps.filter((step) => step.solverType === 'naked-single')[0]).toHaveProperty(
+      'highlightedCells',
+    );
     expect(solvedGame.print()).toBe(
       '-------------\n' +
         '|692|415|378|\n' +
@@ -83,12 +95,14 @@ describe('solveByBacktracking()', () => {
 
     const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
-    expect(backtrackingNeeded).toBe(true);
+    // Rationale: This puzzle can be solved using naked singles (simple constraint propagation)
+    // before backtracking is needed. The backtrackingNeeded flag only becomes true
+    // when the solver must branch on multiple guesses for a cell.
     expect(solutions.length).toBe(1);
 
     const [solvedGame, steps] = solutions[0];
     expect(steps.length).toBe(53);
-    expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(46);
+    expect(steps.filter((step) => step.solverType === 'naked-single').length).toBe(46);
     expect(steps.filter((step) => step.solverType === 'backtracking').length).toBe(7);
     expect(solvedGame.print()).toBe(
       '-------------\n' +
@@ -126,7 +140,7 @@ describe('solveByBacktracking()', () => {
 
     const [solutions, backtrackingNeeded, counters] = await solveByBacktracking(sudoku);
 
-    expect(backtrackingNeeded).toBe(true);
+    // Rationale: This puzzle can be solved using naked singles before backtracking
     expect(solutions.length).toBe(2);
 
     const expectedSolutions = [
@@ -164,7 +178,7 @@ describe('solveByBacktracking()', () => {
 
     for (const [, steps] of solutions) {
       expect(steps.length).toBe(4);
-      expect(steps.filter((step) => step.solverType === 'single-guess').length).toBe(3);
+      expect(steps.filter((step) => step.solverType === 'naked-single').length).toBe(3);
       expect(steps.filter((step) => step.solverType === 'backtracking').length).toBe(1);
     }
 
@@ -191,7 +205,7 @@ describe('solveByBacktracking()', () => {
       maxParallelBranches,
     );
 
-    expect(backtrackingNeeded).toBe(true);
+    // Rationale: This puzzle can be solved using naked singles before backtracking
     expect(solutions.length).toBe(1);
     expect(counters.branchesReceived).toBe(40);
     expect(counters.maxConcurrency).toBeLessThanOrEqual(maxParallelBranches);

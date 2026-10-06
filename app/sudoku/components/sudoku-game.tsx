@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { SudokuGrid } from '../sudoku/sudoku';
+import { SudokuGrid } from '../core';
 import SudokuCell from './sudoku-game-cell';
 import SudokuControls from './sudoku-controls';
-import { solveByBacktracking } from '../solver/backtracking';
+import { solveByBacktracking } from '../core/solver/backtracking';
 
 export default function SudokuGame({ initialValues }: { initialValues: number[][] }) {
   const [sudoku, setSudoku] = useState<SudokuGrid>(() => new SudokuGrid(initialValues));

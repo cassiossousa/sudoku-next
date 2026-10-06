@@ -11,10 +11,11 @@
 1. Keep changes small and focused on the task.
 2. Prefer project patterns already in use instead of introducing new abstractions.
 3. Follow TDD for bug fixes and behavior changes: add or update the relevant test before implementing the fix.
-4. Validate with the smallest relevant Jest command after changing behavior.
-5. Avoid broad refactors unless the task requires it.
-6. Maintain clear separation between domain logic (Sudoku rules, constraints, generation) and UI concerns (rendering, input handling, state display).
-7. When adding features, consider whether they belong in the game engine layer, solver layer, or presentation layer.
+4. **HARD RULE: All new source files (TS/TSX) must have corresponding test files. Test files must be created alongside or before new implementation files.**
+5. Validate with the smallest relevant Jest command after changing behavior.
+6. Avoid broad refactors unless the task requires it.
+7. Maintain clear separation between domain logic (Sudoku rules, constraints, generation) and UI concerns (rendering, input handling, state display).
+8. When adding features, consider whether they belong in the game engine layer, solver layer, or presentation layer.
 
 ## Sudoku-Specific Expectations
 - Keep each puzzle in `app/sudoku/games.ts` as a valid `Game` with:
@@ -43,6 +44,7 @@
 - Only add custom CSS when Tailwind cannot express the requirement cleanly; prefer small, scoped styles over broad global resets.
 
 ## Next.js and SSR Pitfalls
+- **CRITICAL**: When using React hooks (`useState`, `useEffect`, `useCallback`, etc.) in the App Router, the file MUST have `'use client';` at the very top (before any imports). This directive tells Next.js to treat the component as a Client Component, enabling hooks and browser APIs.
 - Do not rely on values that are different between server render and client hydration, such as `Math.random()`, `Date.now()`, `new Date()`, or any browser-only API during render.
 - Never precompute a random game on the server for the initial page render; the app must keep the initial state stable until a user action or a client-only effect runs.
 - Beware of server/client mismatches from access to `window`, `document`, `navigator`, `localStorage`, `sessionStorage`, or media queries during render.
@@ -50,6 +52,57 @@
 - Keep interactive behavior in client-driven flows; if it must happen after mount, gate it behind `useEffect` or user input rather than server render logic.
 - Do not assume SSR can fully reproduce a client-only experience such as random game selection, timers, hover-driven state, or layout decisions based on viewport size.
 - If a feature cannot be reliably pre-rendered server-side, prefer a stable fallback and then hydrate or update the UI after the client has initialized.
+
+## File Structure
+
+The project follows a layered architecture with clear separation of concerns:
+
+```
+app/
+├── sudoku/
+│   ├── core/                    # Domain logic (framework-free)
+│   │   ├── grid.ts             # Grid data model, constraints
+│   │   ├── grid-cell.ts        # Cell implementation
+│   │   ├── grid-validation.ts # Validation logic
+│   │   ├── index.ts           # Core exports
+│   │   ├── solver/            # Solving algorithms
+│   │   │   ├── backtracking.tsx
+│   │   │   ├── single-guess.tsx
+│   │   │   ├── semaphore.ts
+│   │   │   └── step.tsx
+│   │   └── generator/         # Puzzle generation
+│   │       └── seed-based.ts  # Transformation-based generation
+│   ├── state/                 # Game state management
+│   │   └── game-state.ts      # GameState types and factory
+│   ├── hooks/                 # React hooks for UI
+│   │   └── useGameState.ts    # Game state hook
+│   ├── components/            # UI components
+│   │   ├── sudoku-game.tsx
+│   │   ├── sudoku-game-cell.tsx
+│   │   └── sudoku-controls.tsx
+│   ├── games.ts              # Pre-generated puzzle data
+│   └── sudoku.tsx            # Main re-exports
+├── components/               # Shared UI components
+└── page.tsx                 # Main page
+```
+
+## Architecture Patterns
+
+### Layered Architecture
+- **Domain Layer** (`app/sudoku/core/`): Pure Sudoku logic, no framework dependencies
+- **Application Layer** (`app/sudoku/state/`, `app/sudoku/hooks/`): Game state management and React integration
+- **Presentation Layer** (`app/sudoku/components/`, `app/page.tsx`): UI rendering and user interaction
+
+### Separation Principles
+- Domain logic must remain framework-free and testable without React
+- State management hooks bridge domain logic with React
+- Components are thin and delegate to hooks for state/logic
+- Re-exports from `sudoku.tsx` maintain backward compatibility
+
+## File Size Limits
+- Production TypeScript/JavaScript files: maximum 200 lines (excluding comments/blank lines)
+- Test files: maximum 400 lines (excluding comments/blank lines)
+- Enforced via ESLint `max-lines` rule
 
 ## Testing Expectations
 - Jest is the project test runner.
@@ -208,17 +261,77 @@ Based on Peter Norvig's algorithm, sudoku-core (45 techniques), jonathontoon/sud
    - Naked/hidden pairs, triples, quads
    - Pointing pairs, box-line reduction
 
-2. **Search Layer**
+2. **Advanced Techniques** (beyond basic constraint propagation)
+   - X-wing: pattern across 2 rows/columns
+   - Swordfish: pattern across 3 rows/columns
+   - Jellyfish: pattern across 4 rows/columns
+   - XY-wing: 3-cell pattern with 2 candidates each
+   - XYZ-wing: 3-cell pattern with shared candidate
+   - Forcing chains: hypothetical deductions
+   - Simple coloring: two-color graph of candidates
+   - Multi-coloring: extended coloring patterns
+   - Unique rectangles: uniqueness-based eliminations
+   - ALS (Almost Locked Sets): advanced subset techniques
+
+3. **Search Layer**
    - Backtracking with MRV heuristic (minimum remaining values)
    - Choose empty cell with fewest candidates first
    - Try each candidate, validate, recurse
    - Backtrack on contradiction
 
-3. **Technique Hierarchy** (for hints/difficulty rating)
+4. **Technique Hierarchy** (for hints/difficulty rating)
    - Easy: naked singles, hidden singles
    - Medium: naked/hidden pairs, pointing pairs
    - Hard: x-wing, swordfish, jellyfish
    - Expert: advanced chains, ALS, uniqueness techniques
+
+### Difficulty Rating System
+Based on sudoku-core (technique-based rating), sudokUI (complexity metrics), and human solving time estimation:
+
+1. **Technique-Based Rating**
+   - Track which solving techniques are required to solve a puzzle
+   - Assign difficulty scores to each technique:
+     - Naked singles: 1 point
+     - Hidden singles: 2 points
+     - Naked pairs: 3 points
+     - Hidden pairs: 4 points
+     - Pointing pairs: 5 points
+     - X-wing: 10 points
+     - Swordfish: 15 points
+   - Sum points to determine difficulty category
+
+2. **Complexity Metrics**
+   - Count of initial clues (fewer = harder)
+   - Symmetry score (higher symmetry = easier)
+   - Branching factor in solving tree
+   - Maximum search depth required
+
+3. **Human Time Estimation**
+   - Easy: < 2 minutes for average solver
+   - Medium: 2-5 minutes
+   - Hard: 5-15 minutes
+   - Expert: 15+ minutes
+
+### Pencil Marks / Notes System
+Based on Super Sudoku, sudokUI, and mobile Sudoku app patterns:
+
+1. **Data Structure**
+   - 3D array: `notes[row][col][digit]` (boolean)
+   - Or 2D array of Sets: `notes[row][col] = Set<Digit>`
+   - Initialize with all 1-9 for empty cells
+   - Clear when cell is filled
+
+2. **Auto-Fill Notes**
+   - On puzzle start, calculate initial candidates for each empty cell
+   - After each move, update affected cells' notes
+   - Remove numbers that appear in same row/col/box
+
+3. **UI Patterns**
+   - Small numbers in corners of cells
+   - Toggle notes mode with button/keyboard shortcut
+   - Click number in notes to toggle it
+   - Auto-clear notes when cell is filled with value
+   - Highlight cells with related notes when number selected
 
 ### Puzzle Generation Strategies
 Based on sudoku-gen (transformations), Super Sudoku (constraint satisfaction), sudokUI (pattern-based), and alicommit-malp/sudoku:
@@ -430,6 +543,9 @@ This AGENTS.md incorporates patterns and insights from 20+ industry sources:
 - SudokuPy - Python+C generator for ML datasets
 - alicommit-malp/sudoku - Python generator with symmetry
 - Design Sudoku Solver (theskilledcoder.com) - LLD with Strategy pattern
+- Sudoku Explainer (SudokuExplainer GitHub) - Advanced solving techniques
+- HoDoKu - Java Sudoku with advanced solving
+- Sudoku Wiki (sudopedia.org) - Comprehensive technique reference
 
 **DDD & Clean Architecture:**
 - gushakov/game-clean - Clean DDD RPG game

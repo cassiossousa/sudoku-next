@@ -1,19 +1,11 @@
+'use client';
+
 import { useState } from 'react';
 import Footer from './components/footer';
-import SudokuGame from './components/sudoku-game';
-import { sudokuGames, type Game } from './sudoku/games';
+import SudokuGame from './sudoku/components/sudoku-game';
+import { sudokuGames, getRandomGameByDifficulty, type Game } from './sudoku/games';
 
-const difficultyLevels = ['easy', 'medium', 'hard'] as const;
-
-export function getRandomGameByDifficulty(difficulty: Game['difficulty']) {
-  const games = sudokuGames.filter((game) => game.difficulty === difficulty);
-
-  if (games.length === 0) {
-    throw new Error(`No games available for difficulty: ${difficulty}`);
-  }
-
-  return games[Math.floor(Math.random() * games.length)];
-}
+const difficultyLevels = ['easy', 'medium', 'hard', 'expert'] as const;
 
 export default function Home() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Game['difficulty'] | null>(null);

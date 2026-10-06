@@ -1,5 +1,5 @@
-import { IGrid, IGridCell } from '../sudoku/sudoku';
-import { fillSingleGuesses } from './single-guess';
+import { IGrid, IGridCell } from '../../sudoku';
+import { fillNakedSingles } from './naked-singles';
 import { SolverStep } from './step';
 import { createSemaphore } from './semaphore';
 
@@ -37,6 +37,12 @@ export const MAX_PARALLEL_BRANCHES = 20;
  *
  * A grid with exactly 17 digits and one solution takes a few minutes to be solved.
  *
+ * OPTIMIZATION: Before backtracking, we apply simpler solving techniques
+ * (naked singles, X-wing, etc.) in sequence. This mimics how expert human
+ * solvers approach puzzles and reduces the search space for backtracking.
+ * Techniques like naked singles are very fast and can solve many puzzles
+ * without any backtracking at all.
+ *
  * When a bifurcation occurs, each guess branch becomes an async task.
  * The maxParallelBranches limit controls how many of those branches may run
  * concurrently so the solving process can be tuned for heavier servers.
@@ -51,6 +57,11 @@ export async function solveByBacktracking(
   let backtrackingNeeded = false;
   const semaphore = createSemaphore<[IGrid, SolverStep[]][]>(maxParallelBranches);
 
+  // Check if already solved before attempting any solving
+  if (emptyGrid.getFirstEmptyCell() === null) {
+    return [[[emptyGrid, []]], false, { branchesReceived: 0, maxConcurrency: 0 }];
+  }
+
   // The current recursive call may spawn multiple branch tasks.
   // Each branch must acquire a semaphore slot before recursing so that
   // the total number of active parallel branches never exceeds the limit.
@@ -58,17 +69,13 @@ export async function solveByBacktracking(
     currentGrid: IGrid,
     currentSteps: SolverStep[],
   ): Promise<[IGrid, SolverStep[]][]> => {
-    // OPTIMIZATION: fill all single guesses in-place,
+    // OPTIMIZATION: fill all naked singles in-place,
     // and if this is enough to solve the grid, return it.
-    const [fullySolved, singleGuessSteps] = fillSingleGuesses(currentGrid);
+    const [fullySolved, nakedSingleSteps] = fillNakedSingles(currentGrid);
 
     if (fullySolved) {
-      return [[currentGrid, [...currentSteps, ...singleGuessSteps]]];
+      return [[currentGrid, [...currentSteps, ...nakedSingleSteps]]];
     }
-
-    // Code needs to get to this very point
-    // in order to require backtracking.
-    backtrackingNeeded = true;
 
     // After the first optimization, this next cell cannot be null.
     const firstCell = currentGrid.getFirstEmptyCell()!;
@@ -106,7 +113,7 @@ export async function solveByBacktracking(
         value,
       };
 
-      const steps: SolverStep[] = [...currentSteps, ...singleGuessSteps, backtrackingStep];
+      const steps: SolverStep[] = [...currentSteps, ...nakedSingleSteps, backtrackingStep];
 
       const branchPromise = semaphore(() => _recursiveBacktracking(gridToIterate, steps));
 

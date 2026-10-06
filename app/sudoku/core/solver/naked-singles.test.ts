@@ -1,7 +1,14 @@
-import { SudokuGrid } from '../sudoku/sudoku';
-import { fillSingleGuesses } from './single-guess';
+import { SudokuGrid } from '../grid';
+import { fillNakedSingles } from './naked-singles';
 
-describe('fillSingleGuesses()', () => {
+/**
+ * Naked Singles Technique Tests
+ *
+ * Tests the naked singles technique which fills cells that have exactly
+ * one possible value remaining. This is the simplest and most common
+ * solving technique, used by all Sudoku solvers.
+ */
+describe('fillNakedSingles()', () => {
   it('returns true if the Sudoku game is already solved', () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [6, 9, 2, 4, 1, 5, 3, 7, 8],
@@ -15,7 +22,7 @@ describe('fillSingleGuesses()', () => {
       [2, 8, 7, 5, 4, 9, 6, 1, 3],
     ]);
 
-    const [fullySolved, steps] = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillNakedSingles(sudoku);
     expect(fullySolved).toBe(true);
     expect(steps.length).toBe(0);
     expect(sudoku.print()).toBe(
@@ -35,7 +42,7 @@ describe('fillSingleGuesses()', () => {
     );
   });
 
-  it('fills single guesses and solves an easy Sudoku game', () => {
+  it('fills naked singles and solves an easy Sudoku game', () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [6, 0, 2, 4, 1, 0, 0, 0, 8],
       [0, 1, 5, 7, 0, 3, 0, 0, 9],
@@ -48,7 +55,7 @@ describe('fillSingleGuesses()', () => {
       [0, 8, 7, 0, 0, 0, 6, 0, 3],
     ]);
 
-    const [fullySolved, steps] = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillNakedSingles(sudoku);
     expect(fullySolved).toBe(true);
     expect(steps.length).toBe(43);
     expect(sudoku.print()).toBe(
@@ -68,7 +75,7 @@ describe('fillSingleGuesses()', () => {
     );
   });
 
-  it('fills single guesses without solving harder Sudoku games', () => {
+  it('fills naked singles without solving harder Sudoku games', () => {
     const sudoku: SudokuGrid = new SudokuGrid([
       [0, 4, 0, 8, 0, 0, 2, 0, 0],
       [5, 3, 0, 0, 0, 0, 0, 0, 4],
@@ -81,7 +88,7 @@ describe('fillSingleGuesses()', () => {
       [0, 6, 0, 0, 0, 5, 3, 0, 0],
     ]);
 
-    const [fullySolved, steps] = fillSingleGuesses(sudoku);
+    const [fullySolved, steps] = fillNakedSingles(sudoku);
     expect(fullySolved).toBe(false);
     expect(steps.length).toBe(9);
     expect(sudoku.print()).toBe(

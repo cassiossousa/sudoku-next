@@ -1,6 +1,9 @@
 import { type IGridCell, SudokuGridCell } from './grid-cell';
 import { GridValidation } from './grid-validation';
 
+export * from './grid-cell';
+export * from './grid-validation';
+
 export interface IGrid {
   getFirstEmptyCell(): IGridCell | null;
   getNextEmptyCell(cell: IGridCell): IGridCell | null;
