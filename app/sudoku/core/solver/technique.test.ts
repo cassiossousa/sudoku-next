@@ -1,4 +1,4 @@
-import { type IGrid } from '../../grid';
+import { type IGrid } from '../grid';
 import { type TechniqueResult, SolverTechnique } from './technique';
 
 /**

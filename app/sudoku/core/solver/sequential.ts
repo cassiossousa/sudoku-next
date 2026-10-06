@@ -1,4 +1,4 @@
-import { type IGrid } from '../../grid';
+import { type IGrid } from '../grid';
 import { fillNakedSingles } from './naked-singles';
 import { XWing } from './techniques/x-wing';
 import { HiddenSingles } from './techniques/hidden-singles';
