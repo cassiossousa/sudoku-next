@@ -3,6 +3,7 @@ build
 coverage
 
 # Ignore the following files
+AGENTS.md
 README.md
 LICENSE.md
 package.json
